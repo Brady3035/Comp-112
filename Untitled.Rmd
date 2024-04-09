@@ -1,0 +1,70 @@
+---
+title: "In Class activity"
+author: "Brady Brunswig"
+date: "2024-01-25"
+output: html_document
+---
+```{r,message=FALSE}
+library(tidyverse)
+library(ISLR2)
+library(fivethirtyeight)
+head(Auto)
+dim(Auto)
+names(Auto)
+str(Auto)
+
+```
+
+```{r}
+Auto1<-Auto[,c(9,1:8)]
+
+names(Auto1)
+
+head(Auto1)
+```
+
+## Exercise 1
+
+Make appropriate histograms for the variables **acceleration** and **displacement** for this dataset.  Use at least two different bin sizes (between 5 and 20 bins)for each histogram.  As best you can (you don't need to use precise statistical language unless you know it) describe the differences between the distribution of these two variables that are apparent from the histograms.
+
+Acceleration follows a more normal distibution with a mean and q1,q3 pretty evenly spaced from the mean
+
+Displacement has a few stand out values, likely due to standardised engine configuations, not following a normalally distributed set of values.
+
+\
+
+```{r}
+ggplot(Auto1,aes(displacement))+
+  geom_histogram(bins = 12)
+```
+```{r}
+ggplot(Auto1,aes(acceleration))+
+  geom_histogram(bins = 10)
+```
+
+## Exercise 2
+
+For this exercise we will use the dataset US_births_1994_2003 that we used extensively last class.  before you can use this dataset, make sure you load in the package (fivethirtyeight) which contains the data.
+
+Just for practice make barplots of the variables *day_of_week* and *date_of_month*.  Even though we can make these plots they do not tell us anything new about these variables (why?).
+
+Because the days of the month are numbers we could make a histogram of this variable.  Do this now (using the defaults). What is going on?  Can you explain? Can you fix this plot by changing the number of bins? Even though we can make a histogram for this variabe, say why this type of plot is not appropriate (useful?) in this case.
+
+Also, make an appropriate histogram for the variable *births* and describe the distribution of this quantitative variable.
+
+
+```{r}
+ggplot(US_births_1994_2003,aes(day_of_week))+
+  geom_bar()
+```
+how many times the day of the week has happened in the dataset
+```{r}
+ggplot(US_births_1994_2003,aes(date_of_month))+
+  geom_bar()
+```
+How many times the date of the month occoured in the data set
+```{r}
+ggplot(US_births_1994_2003,aes(date_of_month))+
+  geom_histogram(bins = 31)
+```
+histogram didnt even change this

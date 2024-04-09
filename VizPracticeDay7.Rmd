@@ -1,0 +1,136 @@
+---
+title: "Visualization Practice"
+author: "Dan O'Loughlin"
+date: "2024-02-08"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 4, 
+  fig.width = 6,
+  fig.align = 'center')
+```
+
+
+# Practice with visualization
+
+Using a dataset called `SaratogaHouses` we will do some practice with visualization. 
+
+\
+
+
+
+```{r}
+
+# load packages including data
+
+library(tidyverse)
+library(mosaicData)
+
+## SaratogaHouses is Data on houses in Saratoga County, New York, USA in 2006
+## it is part of the mosaicData package
+
+head(SaratogaHouses)
+
+str(SaratogaHouses)
+
+```
+
+\
+
+# Plot No. 1
+
+\
+
+
+Consider the code below which 
+
+- Makes a plot showing three variables
+
+- Scales one of the variables to make an axis more readable
+
+- Makes a new plot with the newly scaled variable that also has labels
+
+
+
+\
+
+
+```{r}
+
+ggplot(SaratogaHouses,aes(x=livingArea,y=price,color=centralAir))+
+  geom_point()+
+  geom_smooth(se=FALSE,method=lm)
+
+## NOTE:  the following command is not optimal since it changes the data
+## we wil learn better ways to do change the scale of a variable in the next unit
+## on Data wrangling
+
+SaratogaHouses$price<-SaratogaHouses$price/1000
+
+ggplot(SaratogaHouses,aes(x=livingArea,y=price,color=centralAir))+
+  geom_point()+
+  geom_smooth(se=FALSE,method=lm)+
+  labs(color="Central Air",title="square footage of homes vs price by central air in Saratoga")+
+  xlab("square footage")+ylab("price in 1K dollars")
+
+```
+
+## Questions about plot 1
+
+\
+
+- What does this plot tell us about these three variables?
+
+- What are some other plots we could make which could help illuminate the relationship between these three variables?
+
+\
+
+# Activity
+```{r}
+ggplot(SaratogaHouses,aes(x=livingArea,y=price,color = newConstruction))+
+  geom_point()+
+  geom_smooth(se=FALSE,method=lm)+
+  labs(color="New Construction",title="square footage of homes vs price by type of heating colored by new constrction status in Saratoga")+
+  xlab("square footage")+ylab("price in 1K dollars") + 
+  facet_wrap(~fuel)
+
+```
+\
+
+## No 1.  
+
+Write code below which makes one more plot using these three variables, then say what your plot shows. Your plot should include labels (you might want to look at help("labs"))
+
+\
+
+**Put your code here**
+
+\
+\
+
+
+## No 2.  
+
+Write code below which makes a plot using three different variables from the dataset. Again, say what your plot shows, and your plot should include labels.
+
+\
+
+**Put your code here**
+```{r}
+ggplot(SaratogaHouses,aes(x=bathrooms))+
+  geom_density()+
+  labs(title="Bathroom number distibution given bedroom count")+
+  xlab("Bathrooms")+ylab("Count") +
+  facet_wrap(~bedrooms)
+```

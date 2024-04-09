@@ -1,0 +1,103 @@
+---
+title: "Day 11 Quick Wrangling"
+author: "COMP/STAT 112 - Macalester"
+date: "2024-02-22"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 5,
+  fig.width = 7,
+  fig.align = 'center')
+```
+
+\
+\
+
+# Load Packages
+
+```{r}
+
+library(tidyverse)
+library(Lahman)
+library(mdsr)
+library(ISLR2)
+
+```
+
+
+\
+\
+
+# Questions:  
+
+At each table use data wrangling to answer each of the following questions as quickly as you can
+
+\
+\
+
+## Question #1
+
+In the `Cherry` dataset how many Males and how many Females had their gun time for the race within 1 minute of their age on race day
+
+\
+\
+
+
+```{r}
+
+# Code chunk for Question #1
+
+
+```
+
+
+\
+\
+
+## Question #2
+
+In the `Bikeshare` dataset what hour of the day had the smallest proportion of total riders (bikers) who were casual riders (casual), and what hour of the day had the largest proportion?  In each case what was the proportion?
+
+\
+\
+
+```{r}
+
+
+# Code chunk for Question #2
+
+
+
+```
+
+
+\
+\
+
+## Question #3
+
+In the `Batting` dataset from the Lahman package, for players with at least 200 atbats (AB) in a season, how many players had more home runs (HR) than singles (Single)?  and who was the most recent player to achieve this (you can just give their playerID)?
+
+HINT:  a single is not a stat listed in the data, but it can be computed by subtracting doubles (X2B), triples (X3B) and home runs (HR) from the total number of hits (H), 
+
+so   **Single = H - X2B - X3B - HR**
+
+\
+\
+
+```{r}
+
+
+# Code chunk for Question #3
+
+  
+```

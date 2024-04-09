@@ -1,0 +1,328 @@
+---
+title: "COMP/STAT 112 Midterm Assessment"
+author: <Brady B>
+date: "2024-03-25"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 4, 
+  fig.width = 7,
+  fig.align = 'center')
+```
+
+# Instructions Etc.
+
+**Begin by putting your name above as the author of this document**
+
+\
+\
+
+
+You are to do this part of the assessment using `R` via `RStudio` on your computer.  
+
+\
+\
+
+- On this part of the assessment you may collaborate with others from our class.  However each student will turn in their own `R Markdown` document with their own code and explanations.
+
+\
+
+- You are not required to work collaboratively with others, but, if you do, you must name the people you worked with in your turned-in solutions.
+
+\
+
+- You can work collaboratively with other COMP/STAT 112 student from this section.  You can use any COMP/STAT 112 material from this semester.  But you cannot use any other resources (e.g., internet, people outside this class, preceptors).  You are *NOT* allowed to talk to anyone else outside of this class (section) about the problems or the solutions.
+
+\
+
+- You will submit the well-formatted html output of this `R Markdown` document of your work on Part II to Moodle by 3 pm on Wednesday, 27 March (tomorrow). 
+
+\
+\
+
+
+```{r}
+
+# Load in the necessary packages
+
+library(tidyverse)
+library(mdsr)
+
+```
+
+\
+\
+
+# World Cities and Population
+
+\
+
+For this assessment you will work with three datasets
+
+- the`world_cities` dataset available through the package `mdsr`, 
+
+- the `world_bank_pop` dataset which is part of the `tidyr` package, 
+
+- and the dataset `CountryCodes` which you will download in the next code chunk.
+
+\
+\
+
+## Loading and Wrangling of the datasets
+
+\
+\
+
+```{r}
+
+# Loading and Wrangling the CountryCodes data
+
+CountryCodes <- read_csv(
+  "https://raw.githubusercontent.com/djoloughlin/Data/main/CountryCodes.csv") %>% 
+  rename(country2=`Alpha-2 code`,country3=`Alpha-3 code`) %>%
+  arrange(country2) 
+  
+
+head(CountryCodes)
+```
+
+\
+\
+
+```{r}
+
+# Wrangling the world_cities data
+
+WorldCities<-world_cities %>% 
+  na.omit() %>%
+  select(name,latitude,longitude,country,country_region,population,modification_date)
+
+head(WorldCities)
+
+
+
+```
+
+
+\
+\
+
+```{r}
+
+WorldPopulation<-world_bank_pop %>%
+  na.omit() %>%
+  filter(indicator=="SP.POP.TOTL") %>%
+  rename(Y2000=`2000`,Y2015=`2015`) %>%
+  select(country,Y2000,Y2015)
+
+head(WorldPopulation)
+```
+
+\
+\
+ 
+# Problems 
+
+(each problem is worth 2 points for a total of 10)
+
+\
+\
+
+## Problem 1
+
+\
+\
+
+This is a warm-up problem.  Using just the `WorldCities` wrangled data make a table of the largest Cities in the United states (the two character country code is "US") by population, sorted from largest to smallest.  Display the 20 largest Cities.  Do you notice anything interesting about the cities that are listed (HINT: What are the five boroughs of NYC)?  Also, say how many of these cities have more than 1 million people according to this data.
+
+\
+\
+
+```{r}
+
+LargestCitiesUS <- world_cities %>%
+  filter(country == "US") %>%
+  select(name,population) %>%
+  arrange(desc(population))
+
+millionCities <- LargestCitiesUS %>%
+  filter(population>=1000000)
+as.data.frame(LargestCitiesUS[1:20,])
+nrow(millionCities)
+```
+New York has a few burrows listed, 14 cities with a population over 1 million
+
+
+\
+\
+
+## Problem 2
+
+\
+\
+
+Filter the `WorldCities` table to find information about the Twin Cities of "Minneapolis" and "Saint Paul".  Once you find their latitudes and longitudes, make a table of all cities in the Western Hemisphere that are within 1 degree of latitude from Minneapolis.  Use the definition of the western hemisphere as longitudes between -160 degrees and -20 degrees.  Where do Minneapolis and Saint Paul rank among these cities in terms of their population?
+
+\
+\
+
+```{r}
+
+twinCities <- WorldCities %>%
+  filter(name == "Minneapolis" | name == "Saint Paul")
+
+citiesLatitude <- WorldCities %>%
+  filter(latitude <=45.97997 & latitude >= 43.97997 & longitude >=-160 & longitude<=-20) %>%
+  arrange(desc(population))
+
+
+
+```
+Minneaplois is number 4, St Paul is 7
+
+
+
+\
+\
+
+## Problem 3
+
+\
+\
+
+Note that the variable `country_region` in the `WorldCities` data gives the state in which the city is located for all US cities. How many US "states" are represented in this dataset?  Are all of these "states" actually states?
+
+
+Make a barplot where the bars represent data for US states and the heights of the bars are the number of cities in that state that have over 200,000 people.  Show the top 20 states in this plot with the bars ordered from left to right in such a way that the left-most bar is for the state with the most such cities, and the next bar has the second most such cities, etc.  The bars should be labeled by their two character state code, and the label on the x-axis of the plot should say `State`.
+
+\
+\
+
+```{r}
+
+statesData <- WorldCities %>%
+  filter(country == "US",population >= 200000) %>%
+  group_by(country_region) %>%
+  summarize(number = n()) %>%
+  arrange(desc(number))
+  
+top20 <-head(statesData,20)
+ggplot(top20,aes(x=reorder(country_region,desc(number)),y = number)) + 
+  geom_col() + labs(x = "State")
+```
+
+Washington DC isnt a state, 45 states are observed
+
+\
+\
+
+## Problem 4
+
+\
+\
+
+For this problem you will need to use the `WorldPopulation` dataset and the `CountryCodes` dataset.  First join the tables and replace the 3 character country code used in the `WorldPopulation` table with the full name of the country, then make a new variable, called `PctInc`, which represents the Percent increase in population from 2000 to 2015 for each country.  Order this table from largest percent increase to smallest (most negative).  The final table should have the country name, the populations for 2000 and 2015 and the percent increase in population over that time span.  Give the top five and bottom five countries in terms of percent increase (or decrease) in population.
+
+\
+\
+
+```{r}
+
+updatedWorldPopulation <- WorldPopulation %>%
+  left_join(CountryCodes, by = c('country' = 'country3')) %>%
+  select(Country, Y2000, Y2015) %>%
+  mutate(pctINC = ((Y2015 / Y2000) -1 )* 100) %>%
+  arrange(desc(pctINC))
+
+top5 <- head(updatedWorldPopulation,5)
+
+bottom5 <-updatedWorldPopulation %>%
+  arrange(pctINC)
+head(bottom5,5)
+
+```
+
+
+
+\
+\
+
+## Problem 5
+
+\
+\
+
+For this problem the first thing to do is add the country names to the `WorldCities` Table by joining information from the `CountryCodes` Table.  
+
+In this question we will explore cities that are at different latitudes or "zones". We will define `Equatorial Cities` to be those within 10 degrees of the equator (i.e., -10 <= latitude <= 10) and `Polar Cities` to be those whose latitude is greater than or equal to 50 degrees or less than or equal to -50 degrees.  Cities will be called `Tropical` Cities if they are between 10 and 30 degrees from the equator on either side, and `Temperate` if they are between 30 and 50 degrees from the equator on either side.  
+
+For each of these "zones", make a table of the ten largest cities.  Each of your tables should have the name of the city, its country, its population (as defined by this table), and its latitude.  Also say how many cities are in each "zone".
+
+\
+\
+
+```{r}
+updatedWorldCities <- WorldCities %>%
+  left_join(CountryCodes, by = c('country' = 'country2')) %>%
+  select(name,Country,longitude,latitude,population)
+
+EquatorialCities<- updatedWorldCities %>%
+  filter(latitude <= 10 & latitude>=-10) %>%
+  arrange(desc(population))
+
+nrow(EquatorialCities)
+EquatorialCities10 <- head(EquatorialCities,10)
+
+
+PolarCities<- updatedWorldCities %>%
+  filter(latitude <= -50 | latitude>=50)%>%
+  arrange(desc(population))
+
+nrow(PolarCities)
+PolarCities10 <- head(PolarCities,10)
+
+
+TropicalCities<- updatedWorldCities %>%
+  filter(latitude <= 30 & latitude>=10 | latitude <= -10 & latitude>=-30 ) %>%
+  arrange(desc(population))
+
+nrow(TropicalCities)
+TropicalCities10 <- head(TropicalCities,10)
+
+
+TemperateCities<- updatedWorldCities %>%
+  filter(latitude <= 50 & latitude>=30 | latitude <= -30 & latitude>=-50 ) %>%
+  arrange(desc(population))
+
+nrow(TemperateCities)
+TemperateCities10 <- head(TemperateCities,10)
+
+```
+
+\
+\
+
+#  Finishing Up
+
+\
+
+Look back over your work and make sure you have answered every question.  Make sure that you have formatted your code nicely and that your output is shown in the html output for the R Markdown.  In the space below put the names of any other students from our section that you collaborated with
+
+\
+
+**I collaborated with: Mary and Sophia**
+
+\
+\
+\
+
+Then post your html output *AND ONLY YOUR HTML OUTPUT* to Moodle.

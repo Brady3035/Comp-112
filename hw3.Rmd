@@ -1,0 +1,65 @@
+---
+title: "Assignment 3"
+author: "Brady Brunswig"
+date: "2024-02-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidytuesdayR)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggoxford)
+library(countrycode)
+library(treemapify)
+
+heritage <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-02-06/heritage.csv')
+heritage_long <-gather(heritage,year,sites,-country)
+
+# Create a new column 'ISO3' with ISO-3 country codes
+heritage_long$ISO3 <- countrycode(
+    sourcevar = heritage_long$country,
+    origin = 'country.name',
+    destination = "iso3c"
+)
+
+```
+
+
+```{r}
+ggplot(data = heritage_long, aes(x=ISO3,y=sites,fill = country))+
+  geom_bar(stat = "identity")+
+  geom_axis_flags(breaks = heritage_long$ISO3,
+                  labels = heritage_long$country,
+                  country_icons = heritage_long$ISO3,
+                  axis = "x",
+                  width = 30,
+                  lineheight = 2,
+                  fontface = "bold"
+                  )+
+  facet_wrap(~year) + 
+  xlab("Country") + ylab("Sites")
+```
+
+```{r}
+total_sites <- heritage_long %>%
+  group_by(country, year) %>%
+  summarise(total_sites = sum(sites))
+
+ggplot(total_sites, aes(area = total_sites, fill = country, label = total_sites)) +
+  geom_treemap() +
+  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", reflow = TRUE) +
+  scale_fill_manual(values = c(Norway = "blue", Denmark = "red", Sweden = "green")) +
+  labs(title = "Distribution of Heritage Sites Across Countries",
+       subtitle = "2004 vs 2022",
+       fill = "Country",
+       caption = "Area proportional to the number of sites") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        plot.caption = element_text(hjust = 1),
+        panel.grid = element_blank())+
+  facet_wrap(~year)
+  
+
+```

@@ -1,0 +1,301 @@
+---
+title: "Heat Maps, Etc. - Day 6"
+author: "Dan O'Loughlin"
+date: "2024-02-05"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 10,
+  fig.width = 10,
+  fig.align = 'center')
+
+## Much of the code that follows has been adapted from Lessons by
+## Brianna Heggeseth and Alicia Johnson, both MSCS Profs at Macalester
+```
+
+\
+
+**This Document Provides Code for us to explore Heat Maps, which are ways of using color gradients to show the scaled differences between the values in a table either along a row or down a column.  These plots can help highlight unusual values (this is one way we recognized the earthquake in Haiti in 2010 affected the life expectancy data that we considered last class).  They can also show us similarities in rows (cases or individuals) and columns (variables)**
+
+\
+
+
+```{r}
+# Load usual tidyverse package
+library(tidyverse)
+
+# Load the gplots package needed for heatmaps
+library(gplots)
+library(colorspace)
+```
+
+\
+
+# Heat Maps for the `mtcars` data
+
+\
+
+```{r} 
+
+
+# make the data into a matrix
+# the rows will be labeled with the name of the car, and the columns by the column name
+# choose appropriate quantitative variables
+# Then scale the variables (columns) by z-score
+
+plot_data <- mtcars[,c(1,3:7)] %>% 
+  data.matrix() %>% 
+  scale()
+
+str(plot_data)
+```
+
+\
+\
+
+## Heat Map No 1 - Vanilla
+
+Note the colors used to produce the heat map.  In the console type 
+
+*help(cm.colors)*
+
+read the documentation and description and note how different colors are used in the following heat maps.
+
+\
+
+```{r}
+# Construct heatmap 1
+
+heatmap.2(plot_data,
+  dendrogram = "none",
+  Rowv = NA,
+  Colv=NA,
+  scale = "column",
+  keysize = 0.7, 
+  density.info = "none",
+  col = hcl.colors(256), 
+  margins = c(10, 20),
+  colsep = c(1:6), rowsep = (1:32), sepwidth = c(0.05, 0.05),
+  sepcolor = "white", 
+  trace = "none"
+)
+```
+
+\
+
+**Questions**
+
+- note the color of the cell associated with the car *Merc230* for the variable *qsec*.  What does the color of this cell tell us about this car?
+
+- similarly note color of all the cells associated with the car *Cadillac Fleetwood*.  What do the colors tell us about this car?
+
+\
+\
+
+## Heat Map No 2 - Traces Added (Color Palette Changed)
+
+Note which commands have been changed from the previous heat map and see how they have affected the appearance of the plot.  Can you describe what the squiggly lines down the columns are showing about the data?  Has this addition enhanced the plot, or not?
+
+\
+
+```{r}
+
+# Construct heatmap 2
+
+heatmap.2(plot_data,
+  dendrogram = "none",
+  Rowv = NA,
+  Colv=NA,
+  scale = "column",
+  keysize = 0.7, 
+  density.info = "none",
+  col = topo.colors(10),  # this option changed
+  margins = c(10, 20),
+  colsep = c(1:6), rowsep = (1:32), 
+  sepwidth = c(0.07, 0.07),
+  sepcolor = "white", 
+  trace = "column",tracecol = "red"  # these options changed
+)
+```
+
+\
+\
+
+## Heat Map No 3 - Rows Grouped (Rainbow! Colors)
+
+\
+
+Besides the *rainbow* colors (not advised, in general) what was added to this heat map? Look up dendrograms and see if you can explain what they show.  Also change `col = rainbow(7)` to `col = heat.colors(16)` in the code and note how this changes the appearance (for the better?).
+
+\
+
+```{r}
+
+
+# Construct heatmap 3
+# rows are grouped according to similar characteristics
+
+heatmap.2(plot_data,
+  dendrogram = "row", # this option changed
+  Rowv = TRUE, # this option changed
+  Colv = NA,
+  scale = "column",
+  keysize = 1.0, 
+  density.info = "none",
+  col = rainbow(7), # this option changed !! rainbow not recommended !! try heat.colors
+  margins = c(10, 20),
+  colsep = c(1:7), rowsep = (1:50), sepwidth = c(0.05, 0.05),
+  sepcolor = "white", 
+  trace = "none"
+)
+```
+
+\
+\
+
+## Heat Map No 4 - Columns Grouped
+
+Again, note what changed and explain what aspect of the heat map this change emphasizes
+
+\
+
+```{r}
+
+
+# Construct heatmap 4
+# columns are grouped according to similar characteristics
+
+heatmap.2(plot_data,
+  dendrogram = "column", # this option changed
+  Rowv = NA, 
+  Colv = TRUE, # this option changed
+  scale = "column",
+  keysize = 1.0, 
+  density.info = "none",
+  col = terrain_hcl(256), 
+  margins = c(10, 20),
+  colsep = c(1:7), rowsep = (1:50), sepwidth = c(0.05, 0.05),
+  sepcolor = "white", trace = "none"
+)
+```
+
+
+## Group Exercise: Make a Heat Map using SAT data
+
+\
+
+The code below takes the data set described in the Class Lesson  and wrangles it into a matrix with state names along the rows and the variables shown in the code book along the columns.  This matrix is called **ed_mat** 
+
+Use this matrix to make a heat map of the data with the others at your table and answer the questions in the comments in the code chunk.
+
+\
+
+```{r}
+
+library(tidyverse)
+education<- read.csv("https://bcheggeseth.github.io/112_fall_2023/data/sat.csv")
+
+
+ed<- as.data.frame(education) # convert from tibble to data frame
+
+# convert to a matrix with State names as the row names
+row.names(ed) <- ed$State  #added state names as the row names rather than a variable
+ed <- ed %>% select(2:8) #select the 2nd through 8th columns
+ed_mat <- data.matrix(ed) #convert to a matrix format
+
+heatmap.2(ed_mat,
+  dendrogram = "column", # this option changed
+  Rowv = NA, 
+  Colv = TRUE, # this option changed
+  scale = "column",
+  keysize = 1.0, 
+  density.info = "none",
+  col = terrain_hcl(256), 
+  margins = c(10, 20),
+  colsep = c(1:7), rowsep = (1:50), sepwidth = c(0.05, 0.05),
+  sepcolor = "white", trace = "none"
+)
+# make a heat map with this SAT data where states with similar characteristics are grouped together
+# also add a trace line down each column in the plot
+# choose a nice color palette. At your table look up "color palettes in R"
+# or explore options from the "colorspace" package
+
+# pick a state by either the state you were born in if you were born in the US
+# or the first state you visited in the US if you were not born in the US
+
+# Look at your heat map and find the state or states most similar to your state in terms of this data
+
+```
+
+\
+\
+
+## More plots with the SAT Data
+
+You can read through the description of the data again, but wait to write any code until the class is ready
+
+\
+\
+
+The following code makes a scatterplot of average SAT scores versus average teacher's salaries for each state.  To this plot we add a linear trend line.
+
+\
+
+```{r}
+
+ggplot(education, aes( x = sat,y = salary)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE, method = "lm")
+```
+
+\
+
+What does the trend line tell us about the realtionship between these variables?
+
+\
+
+### Add a new variable to the data
+
+You will notice there is a variable in the SAT data set that is not described in the code book.  This variable is a categorical variable which divides the states into three categories based on the fraction of students in the state who take the SAT.  The three categories are
+
+- (0,15] i.e., 15% or less students in the state take the SAT
+
+- (15,45] i.e., 15-45% of students in the state take the SAT
+
+- (45,100] i.e., more than 45% of students in the state take the SAT
+
+We can add this variable to the plot in the following way.  Note how this colors the points and what happens with the trend lines.
+
+
+```{r}
+ggplot(education, aes( x = sat,y = salary, color = fracCat)) + 
+  geom_point(size=2) + 
+  geom_smooth(se = FALSE, method = "lm")
+```
+
+\
+
+What do these added features tell us about the raltionship between these three variables.
+
+\
+
+### Exercise
+
+Make two plots similar to the ones above.  
+
+- The first plot will be a scatterplot with `expend` or state expenditure per pupil on the x-axis and `sat` or average SAT score on the y-axis. Add a trend line to this plot.
+
+- For the second plot, color the points by the variable `fracCat` as above and again add trend lines.
+
+\
+
+Discuss at your tables what you notice about these plots?  Do they make sense, or is something amiss?

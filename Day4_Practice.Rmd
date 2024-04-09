@@ -1,0 +1,56 @@
+---
+title: "Day4_Practice"
+author: "Brady Brunswig"
+date: "2024-01-30"
+output: html_document
+---
+```{r,message=FALSE}
+library(tidyverse)
+library(fivethirtyeight)
+```
+```{r}
+str(mtcars)
+names(mtcars)
+```
+```{r}
+
+ggplot(mtcars,aes(x=qsec))+
+  geom_histogram(color="white", fill="orange",bins=8)
+```
+exersise 2
+```{r}
+
+ggplot(mtcars,aes(x=as.factor(vs)))+
+  geom_bar( fill="purple")
+```
+```{r}
+
+ggplot(mtcars,aes(x=vs))+
+  geom_bar( fill="purple")
+```
+it changes the x-axis to act as a quantitative variable and when comparing just 2 different variables it doesn't make much sense to have the axis show 0.5 and 1.5, etc
+
+exersise 3
+```{r}
+str(elo_blatter)
+names(elo_blatter)
+
+```
+209 rows, 8 columns
+Country is catergorical? elo98,elo15,popu06,gdp06 are all quanatative, and confederation,popu_source,and gdp_source are all catergorical
+
+
+```{r}
+
+ggplot(elo_blatter,aes(x=elo98))+
+  geom_histogram(color="white", fill="black",bins=20)
+```
+Elo98 is more or less normally distibuted along the x axis, with an even amount of outliers on each side
+
+```{r}
+
+ggplot(elo_blatter,aes(x=confederation))+
+  geom_bar(color="white", fill="black")
+```
+
+UEFA seems to be the most frequent confederation, along with afc and caf. 

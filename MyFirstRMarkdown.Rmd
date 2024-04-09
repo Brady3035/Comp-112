@@ -1,0 +1,128 @@
+---
+title: "My First R Markdown Document"
+author: "Brady Brunswig"
+output: html_document
+---
+
+## *Uses for R Markdown Documents*
+
+\
+
+- ### **Running Code**
+
+Note that every code chunk 
+
+begins with ```{r}
+
+and ends with ```
+
+\
+\
+
+```{r first code chunk}
+
+Data<-runif(10,0,100)
+Data
+
+RoundedData<-round(Data)
+RoundedData
+
+order(RoundedData)
+
+sort(RoundedData)
+
+sort(RoundedData,decreasing = TRUE)
+
+```
+
+\
+
+- ### **Adding Text**
+
+\
+
+### After looking at the code chunk can you say what each of the commands do?
+
+- runif() (knit this document many times, and look at the output each time, what do you notice?)
+creates 10 random numbers between 0 and 100
+- round()
+rounds the number to a whole number
+- order()
+
+- sort()
+\
+\
+NOTE:  the second argument to the sort() command is called an option.   In this case if we had not included the option the vector would have been sorted from smallest to largest, i.e., the option decreasing is by default set to FALSE.
+
+\
+\
+\
+
+
+# *Exercises*
+Create a new R Markdown Document called "Homework No. 1".  Do these exercises in that document, then post the input file (.rmd) and the output (.html) to Moodle before class on Thursday.
+
+## Exercise 1: Some Formatting
+
+Go between the html output of this R Markdown document and the input file (the .rmd file open in the scripting window) and say what each of the following formatting strings seem to produce in the output
+
+`*`
+Itilisizes the text
+`**`
+Makes text bold
+`#`
+Headers
+`##`
+sub headers
+`-`
+Bullet list
+`\`
+Blank lines
+\
+\
+
+## Exercise 2: Getting Help
+
+type help("seq") in the console at the prompt.  Skim the documentation (it is fairly cryptic), and then check out the examples at the end of the documentation by clicking on $\underline{Run\space examples}$ 
+
+\
+
+Now use what you learned to create a code chunk to store the sequences and then output those sequences
+
+1) $\space$ 5, 8, 11, ... , 50, 53 $\space$ as Seq1 using $\space$ by =
+```{r}
+Seq1<-seq(5,53,3)
+Seq1
+```
+
+2) $\space$  20.0, 20.5, 21.0, ... , 31.0 $\space$ as Seq2 using $\space$ length.out=
+```{r}
+Seq2<-seq(20,31,.5)
+Seq2
+```
+
+\
+\
+
+
+## Exercise 3: Challenge
+
+Run the following code chunk which summarizes the number of births in the US for each day of the year in 1995.
+
+Add some code which will produce the summary of the number of births in the US for each *Sunday* of the year 1995.
+
+Also, change the option **message=FALSE** to **message=TRUE** and say how this changes the code chunk.
+
+```{r,message=FALSE}
+
+library(fivethirtyeight)
+
+## make a subset of all rows in the table which are from 1995
+
+Births1995<-US_births_1994_2003[US_births_1994_2003$year==1995,]
+Sundays1995<-Births1995[Births1995$day_of_week=="Sun",]
+
+summary(Sundays1995)
+
+```
+

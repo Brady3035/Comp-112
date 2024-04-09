@@ -1,0 +1,121 @@
+---
+title: "Univariate Viz Review and Practice"
+author: "Dan O'Loughlin"
+date: "2024-01-29"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r,message=FALSE}
+library(tidyverse)
+library(fivethirtyeight)
+```
+
+# Intro
+
+\
+
+Last Class (1/24/25) we finished the day with some examples of producing data visualizations for one variable from a dataframe.  We considered **histograms** for a quantitative variable, and **barcharts** for a categorical variable.
+
+\
+
+# Examples
+
+\
+
+Here are some straightforward examples using a simple built-in dataset called **mtcars**.  The first set of commands help us understand aspects of the dataset.
+
+\
+
+```{r}
+str(mtcars)
+
+names(mtcars)
+```
+
+\ 
+
+One of the quantitative variables of this dataset is **qsec** which measures the time it takes from a standing start to travel a quarter mile (in seconds).  Here we make a histogram for this variable.
+
+\ 
+
+```{r}
+
+ggplot(mtcars,aes(x=qsec))+
+  geom_histogram(color="white", fill="orange",bins=8)
+```
+
+\
+
+##  Exercise 1
+
+Because there are only 32 rows (cases) for this dataset, 12 is too many bins for a histogram.  Change the number of bins until you have a histogram that optimizes the information we can determine from a histogram.  Enter the code below
+
+\
+```{r}
+
+ggplot(mtcars,aes(x=qsec))+
+  geom_histogram(color="white", fill="orange",bins=8)
+```
+\
+
+The output from the *str()* command seems to indicate that there are only quantitative variables fo this dataframe (why?), but actually at least two variables can be considered categorical.  These are **am**, which measures whether the car has an automatic (coded as 0) or a manual (coded as 1) transmission, and **vs**, which measures whether the engine has a v-shape (coded as 0) or a straight (coded as 1) configuration for the cylinders.  below is a barchart for the *vs* variable
+
+\
+
+
+\ 
+
+```{r}
+
+ggplot(mtcars,aes(x=as.factor(vs)))+
+  geom_bar( fill="purple")
+```
+
+\
+
+## Exercise 2
+
+Note the use of the command **as.factor()** on line 68.  This command tells R to treat the variable **vs** as a categorical variable even though the values for that variable are numbers.  Replace **as.factor(vs)** with just **vs** and rerun the command, describe how that changes the plot which is produced, and why we would prefer to have the plot produced with **as.factor(vs)**.
+
+```{r}
+
+ggplot(mtcars,aes(x=vs))+
+  geom_bar( fill="purple")
+```
+\
+it changes the x-axis to act as a quantitative variable and when comparing just 2 different variables it doesn't make much sense to have the axis show 0.5 and 1.5, etc
+# Practice
+
+We will practice these type of plots using a dataset from the **fivethirtyeight** package called **elo_blatter**.
+
+This dataset concerns world soccer rankings during the tenure of Sepp Blatter as the President of FIFA (the global Soccer governing body).  
+
+\
+
+*For each of the questions that follow write code that will answer the question and after you run the code write text after your code which answers the questions in your own words.*
+
+\
+
+## Exercise 3
+
+Describe the dataset **elo_blatter**.  In particular say how many rows and columns are in the dataframe, and how many of the variables are quantitative and how many are categorical.
+
+\
+\
+
+## Exercise 4
+
+Make a histogram of the variable **elo98** with an appropriate number of bins.  Using only the histogram that you just produced describe the distribution of this variable.
+
+\
+\
+
+## Exercise 5
+
+Make a barchart of the variable **confederation**.  Using only the barchart that you just produced describe the distribution of this variable.  In particular say which confederation has the most countries  and which confederation has the least countries.
+
+
+

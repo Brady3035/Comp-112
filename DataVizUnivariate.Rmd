@@ -1,0 +1,255 @@
+---
+title: "Data Visualization for Univariate Data"
+author: "Dan O'Loughlin"
+date: "2024-01-24"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# The ggplot package
+
+First we need to load in the package.  In fact the ggplot package can be downloaded as part of a larger set of packages which together is known as the tidyverse.  If you have not already installed the package **tidyverse** do it now in the console.
+
+\
+
+next we run the command...
+
+```{r,message=FALSE}
+library(tidyverse)
+
+
+```
+
+and this loads a number of packages, including ggplot2 into the R Markdown environment.
+
+\
+
+## Our Data
+
+For our first visualizations we will use the data from a package called **ISLR2** which has data-sets used in the book 'An Introduction to Statistical Learning with Applications in R, Second Edition'.  
+
+As above, install this package in the console, if you have not done so already.
+
+\
+
+The following commands load in the package and tell us about the structure of the dataset **Auto** which is part of this package.
+
+```{r}
+library(ISLR2)
+head(Auto)
+dim(Auto)
+names(Auto)
+str(Auto)
+```
+
+\
+
+Note that this dataset is not quite organized as we wish it was.  The identifying column for each row is the last column, and we want to fix that, so we are going to move the last column to the first column.
+
+\
+
+```{r}
+Auto1<-Auto[,c(9,1:8)]
+
+names(Auto1)
+
+head(Auto1)
+```
+
+# The syntax of ggplot
+
+Ggplot uses a syntax which follows the so-called grammar of graphics.
+
+**COMPONENTS OF GRAPHICS**
+
+In data visualization, we essentially start with a blank canvas and then map data onto it.
+There are multiple possible *mapping components*.
+Some basics from [Wickham](https://ggplot2-book.org/introduction) (which goes into more depth):
+
+- **a frame, or coordinate system**       
+    The variables or features that define the axes and gridlines of the canvas.
+
+- **a layer**       
+    The geometric elements (e.g. lines, points) we add to the canvas to represent either the data points themselves or patterns among the data points.
+    Each type of geometric element is a separate layer.
+    These geometric elements are sometimes called "geoms" or "glyphs" (like *heiroglyph*!)
+    
+- **scales**        
+    The aesthetics we might add to geometric elements (e.g. color, size, shape) to incorporate additional information about data scales or groups.
+
+- **faceting**       
+    The splitting up of the data into multiple subplots, or facets, to examine different groups within the data.
+    
+- **a theme**       
+    Additional controls on the "finer points" of the plot aesthetics, (e.g. font type, background, color scheme).
+    
+    
+
+\
+\
+
+This grammar always begins with specifying the dataframe from which we will pull our data for plotting.  
+
+\
+
+In the example below we will be using the data we just loaded in.  The next code chunk creates a blank plot.
+
+\
+
+```{r}
+Plot<-ggplot(Auto1)
+
+Plot
+```
+
+\
+This is not very useful, so next we will tell ggplot which variable we want to visualize.  In this case *mpg*. 
+
+\
+
+```{r}
+MPG_Plot<-ggplot(Auto,aes(x=mpg))
+
+MPG_Plot
+```
+
+\
+This plot is slightly more useful as it at least has the x-axis labelled with the variable.  This is our frame.  From here we will add layers, scales, etc. depending on what type of data we are considering and what aspects of the data we want to visualize.
+
+\
+
+# Plots for quantitative variables
+
+\
+
+For our first true plot we consider again the *quantitative variable* mpg.  We want to know something about the distribution of the data values for this variable across all cars in the dataset, and the best way to see that visually is with a histogram.
+
+\
+
+A histogram is an example of a *geom* or *glyph*.  We add these by appending a
+
++geom_something() 
+
+to our plot.  In this case we add 
+
++geom_histogram()
+
+\
+
+
+```{r}
+MPG_Plot1<-MPG_Plot+geom_histogram()
+
+MPG_Plot1
+```
+
+\
+
+this plot has many drawbacks, but it is the default, we can fix some of these drawbacks with some simple options, these were referred to as *scales* above.
+
+\
+
+```{r}
+MPG_Plot2<-MPG_Plot+geom_histogram(color="white",fill="blue")
+
+MPG_Plot2
+```
+
+\
+
+and even better
+
+\
+
+```{r}
+MPG_Plot3<-MPG_Plot+geom_histogram(color="white",fill="blue",bins = 12)
+
+MPG_Plot3
+```
+
+\
+
+Now, the point of making this visualization is to say something about what it tells us about this variable.  from this histogram what can we say about the mpgs for this set of vehicles?
+
+\
+
+One moral to the story for histograms, is that even though each histogram was made using the exact same set of data, the visual story that each histogram tells about the data emphasizes different aspects of the distribution of the data values across the range of values.  For eaxmple in this case, using 30 bins is too many, and certainly 5 would be too few (see for yourself)
+
+\
+\
+
+
+```{r}
+MPG_Plot4<-MPG_Plot+geom_histogram(color="white",fill="red",bins = 5)
+
+MPG_Plot4
+```
+
+# Plots for categorical variables
+
+It does not look like any of the variables in this dataset are categorical, but that is because the categorical data was added as numbers.Type **help(Auto)** into the console and note what the help page tells us about the variables *origin* and *cylinders*.
+
+\
+
+Run the following code chunks.  
+
+\
+
+
+```{r}
+OriginPlot<-ggplot(Auto1,aes(x=origin))
+
+OriginPlot1<-OriginPlot+geom_bar()
+
+OriginPlot1
+```
+
+```{r}
+CylPlot<-ggplot(Auto1,aes(x=cylinders))
+
+CylPlot1<-CylPlot+geom_bar()
+
+CylPlot
+```
+
+\
+
+Can you say what a barchart for a categorical variable is?  What does it tell you (visually) about the "distribution" of the variable?
+
+For each barchart produced, say what the plot tells us about the data.  If you know something about gasoline engines (less likely for your generation than for mine), what is something you notice in the barchart for cylinders that might be worth exploring more in the data?
+
+\
+\
+
+
+# Exercises
+
+Do as many of these as you can in class.  I will ask you to do some specific Exercises before the next class if you do not get to them in class.  Some of these exercises will be included in the next HW, so if you finish them here you can simply copy your work into that HW.  You should open a new R Markdown document and call it *Day 3 - Exercises*.  Save this notebook in your course folder and do the exercises in this document.
+
+\
+\
+
+## Exercise 1
+
+Make appropriate histograms for the variables **acceleration** and **displacement** for this dataset.  Use at least two different bin sizes (between 5 and 20 bins)for each histogram.  As best you can (you don't need to use precise statistical language unless you know it) describe the differences between the distribution of these two variables that are apparent from the histograms.
+
+\
+
+```{r}
+
+```
+
+## Exercise 2
+
+For this exercise we will use the dataset US_births_1994_2003 that we used extensively last class.  before you can use this dataset, make sure you load in the package (fivethirtyeight) which contains the data.
+
+Just for practice make barplots of the variables *day_of_week* and *date_of_month*.  Even though we can make these plots they do not tell us anything new about these variables (why?).
+
+Because the days of the month are numbers we could make a histogram of this variable.  Do this now (using the defaults). What is going on?  Can you explain? Can you fix this plot by changing the number of bins? Even though we can make a histogram for this variabe, say why this type of plot is not appropriate (useful?) in this case.
+
+Also, make an appropriate histogram for the variable *births* and describe the distribution of this quantitative variable.
+
+
+

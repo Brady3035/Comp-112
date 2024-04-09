@@ -1,0 +1,268 @@
+---
+title: "Lesson No. 9"
+author: "Dan O'Loughlin"
+date: "2024-02-19"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 5,
+  fig.width = 7,
+  fig.align = 'center')
+```
+
+\
+\
+
+# Opener
+
+\
+\
+
+The Minnesota Twins do not have a member of the 30-30 club.  That is, they have never had a player get at least 30 home runs (HR) and at least 30 stolen bases (SB) in the same season.  So, we might ask, who has come the “closest” to achieving this feat?  
+
+Use `dplyr` verbs from last class to answer this question by making three tables (for each table display the following variables playerID,yearID,SB,HR):
+
+- Make a table of all Twins who are in the 20-20 club, i.e., with at least 20 HRs and 20 SBs in a single season. You do not need to sort this table.
+
+- Make a table of all the Twins who have ever had at least 30 HRs in a season and sort this table decreasing by SBs.
+
+- Make a table of all the Twins who have ever had at least 30 SBs in a season and sort this table decreasing by HRs.
+
+**So, now what is the answer to our question?**
+
+\
+\
+
+
+## Opener Code
+
+\
+\
+
+
+```{r}
+
+## Load in packages
+
+library(tidyverse)
+library(Lahman)
+
+
+TwinsSeason20_20Members<-Batting %>%
+  filter(teamID=="MIN")  %>%
+  select(playerID,yearID,HR,SB) %>%
+  filter(HR>=20 & SB>=20) %>%
+  arrange(HR)
+
+##  20-20 players in Twins History
+
+TwinsSeason20_20Members
+
+TwinsSeason30HR_Members<-Batting %>%
+  filter(teamID=="MIN")  %>%
+  select(playerID,yearID,HR,SB) %>%
+  filter(HR>=30) %>%
+  arrange(desc(SB))
+
+## 30 HR players in Twins history arranged in order of SBs
+
+TwinsSeason30HR_Members
+
+TwinsSeason30SB_Members<-Batting %>%
+  filter(teamID=="MIN")  %>%
+  select(playerID,yearID,HR,SB) %>%
+  filter(SB>=30) %>%
+  arrange(desc(HR))
+
+## 30 SB players in Twins history arranged in order of HRs
+
+TwinsSeason30SB_Members
+
+```
+
+\
+
+
+
+\
+
+## Opener Answer
+
+Kirby Puckett is the player with at least 30 HRs or 30 SBs who has the most of the other statistic (31 HR and 20 SB), but it appears that the closest any player has come to being in the 30-30 club is **Corey Koskie** in 2001 when he was 4 HRs from 30 (with 26) and 3 SBs from 30 (with 27). In other words he had the highest minimum, 26, of those two statistics for any player in a single season in Twins history.
+
+\
+
+**Max-Min Table code**
+
+```{r}
+
+TwinsMaxMinHRsSBs<-Batting %>%
+  filter(teamID=="MIN")  %>%
+  select(playerID,yearID,HR,SB) %>%
+  mutate(MinHRSB=pmin(HR,SB)) %>%
+  arrange(desc(MinHRSB))
+
+## Note the use of pmin (pairwise minimum) to find the players with the highest 
+## Minimum of HR and SB in a season in Twins history
+
+TwinsMaxMinHRsSBs[1:15,]
+
+```
+\
+\
+
+# Two New `dplyr` verbs
+
+Even though these two commands are separate commands they are almost always used together.  The idea is that we can use these commands to summarize variables, i.e., do computations like find the mean or median, or some other statistic, or find the maximum value, or even just how many values there are.  This we do just with the `summarize()` command.  The beauty of doing this in conjunction with the `group_by()` command is that we can compute all of these summaries across the categories of a categorical variable.  
+
+\
+\
+
+
+# Examples for `summarize()` with `group_by()` 
+
+\
+
+## Simple Examples with mtcars:
+
+\
+
+suppose we wanted to find the mean mpg in the mtcars dataset, but separated out by whether or not the car has an automatic transmission or not.  Here is code using summarize() and group_by() to achieve that:
+
+\
+
+```{r}
+
+mtcars %>%
+  group_by(am) %>%
+  summarize(mean(mpg))
+```
+
+\
+
+
+Note that the output has only two rows, one for each category in the variable am, and the columns are the group_by variable and the summary stat. 
+
+Similarly we could compute the mean, median and standard deviation grouping by cylinders.
+
+\
+
+```{r}
+mtcars %>%
+  group_by(cyl) %>%
+  summarize(meanMPG=mean(mpg),MedMPG=median(mpg),SD_MPG=sd(mpg))
+```
+
+\
+\
+
+## More Complex Examples with the Bike Share dataset:
+
+\
+
+Suppose we wanted to know how the categorical variable of hr (hour of the day 0-23) affects the mean number of each type of rider, AND we also want to see if these means are different on working days than on non-working days.  Note that, used in conjunction, the commands `summarize()` and `group_by()` will produce a table that has 48 rows corresponding to hours 0-23 for working days (`workingday = 1`) and also to the same hours for non-working days (`workingday = 0`). 
+
+Here is the code (and the first ten rows of the table it produces)
+
+\
+
+```{r}
+
+## load package with Bikeshare data
+
+library(ISLR2)
+
+RidersOnWorkingDays<-Bikeshare %>%
+  group_by(hr,workingday) %>%
+  summarize(Casual=mean(casual), Reg = mean(registered), Total = mean(bikers))
+
+RidersOnWorkingDays
+
+```
+
+\
+
+
+Below are the commands for making a barplot of this data with the Casual riders superimposed (the pink bars) over the total riders, so the parts of the blue bars sticking over the pink bars are the registered riders, since the total number of riders is just the sum of the casual and the registered riders.  Note that [`geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html) makes barplots like `geom_bar()` but it makes the heights of the bars equal to the values in the data. In this case, since there is a row for each hour (`hr`), the barplots have heights equal to the values in the variables for the y-values (`Total` and `Casual`).
+
+\
+\
+
+
+```{r}
+
+ggplot(RidersOnWorkingDays,aes(x=hr))+
+  geom_col(aes(y=Total), fill='blue', color='black') +
+  geom_col(aes(y=Casual), fill='pink', color='black')+
+  facet_wrap(~workingday)
+```
+
+\
+\
+
+# Exercises
+
+\
+\
+
+## Exercise 1
+
+\
+
+Use the `BikeShare` dataset from the `ISLR2` package and find the mean number of registered riders and casual riders when the rows are grouped by:
+
+\
+
+- Month of the year
+
+- Hour of the day
+
+\
+\
+
+```{r}
+
+## Exercise 1 Code HERE
+
+```
+
+\
+\
+
+
+
+
+## Exercise 2
+
+\
+
+Using the `Batting` dataset from the `Lahman` package, find the following:
+
+\
+
+- The season-long totals for the Twins team for home runs (`HR`), hits (`H`), and runs (`R`), for every year from 2000 to 2022.  Also, use `mutate()` to compute the team batting avg. for each year.  Then arrange the table in descending order by the number of runs the team scored.
+
+- Find the career totals (with the Twins) for all of the quantitative variables in the dataset for all players who had more than 200 At Bats (`AB`) with the Twins.  Sort this table in descending order by the number of games the player played in.
+
+
+\
+\
+
+```{r}
+
+## Exercise 2 Code HERE
+
+```
+
+\
+\
+

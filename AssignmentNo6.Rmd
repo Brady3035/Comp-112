@@ -1,0 +1,315 @@
+---
+title: "Assignment No. 6"
+author: <Brady Brunswig>
+date: "2024-03-29"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 3, 
+  fig.width = 5,
+  fig.align = 'center')
+```
+
+
+
+# Instructions Etc.
+
+\
+\
+
+
+- Save this file as **AssignmentNo6** in your course folder for COMP/STAT 112
+- Type your name in line 3 above (where it says <Your Name>).
+- Type your responses in this template. 
+- Do not modify the structure of this document (e.g. don't change section headers, spacing, etc).
+- Submit your knit **HTML** file by the end of the day on Friday 4/5, so by 11:59 PM. We cannot grade Rmd and/or pdf files.
+
+
+\
+\
+
+
+**GOALS**
+
+- perform some basic text wrangling in a guided setting.
+
+- Practice importing data sets from outside sources.
+
+- Use tools from previous units and assignments as appropriate.
+
+The content of the exercises is not necessarily in the order that we learned it, so you'll need to practice identifying appropriate tools for a given task.
+
+In this assignment you will use many functions from the `stringr` package which is part of the `tidyverse`.  It might be helpful to look through the parts of recent lessons that used these commands.
+
+
+\
+\
+
+# Part I - Canadian Elections Data
+
+\
+\
+
+For this part of the assignment you will use a dataset that I have wrangled into a convenient form.  This dataset has information on Canadian elections.
+
+\
+\
+
+
+```{r}
+
+# Load in packages and dataset
+
+library(tidyverse)
+
+## The Candidates data was downloaded from Kaggle at
+## https://www.kaggle.com/datasets/smid80/canadian-federal-election-results-timeseries?select=Candidates.CSV
+## and wrangled into the form below, then imported as Canadian Elections
+## which is the file you will work with
+
+
+CanadianElections <- read_csv("https://raw.githubusercontent.com/djoloughlin/Data/main/CandidatesWithGender1")
+
+
+```
+
+\
+\
+
+
+## Exercise 1
+
+Do some preliminary analysis of the Data.  
+
+\
+
+a) In particular give the dimension of the dataset (numbers of rows and columns) and describe the rows and columns of the dataset.  
+
+\
+
+b) In addition do some preliminary summarizing of the data.  To that end, make the following tables:
+
+\
+\
+
+i) Make a table of the number of candidates by Party (use `party_abbrev`).  How many parties have fewer than 20 candidates according to this table? How many have at least 20 candidates?
+
+\
+
+ii) Even though gender is listed as a variable, many of the candidates do not have a gender listed.  Make a table which shows the total number of candidates with a gender listed, and say how many candidates do not have a gender listed.
+
+\
+
+iii) Determine How many different elections are represented by this dataset (use `election_id`)
+
+\
+
+iv) There is a relationship between the `election_id` and whether or not there is a gender listed for a candidate.  Describe this relationship (you must show some code which helped you figure this out,it is not enough to just give an answer).
+
+\
+
+
+**ANSWER:**
+1. 13,925 entries, 10 total columns, Candidate,election id,electoral district,gender,occupation,noncombatant,elected,residence,providence,party
+2.
+```{r}
+canidatesbyparty <- CanadianElections%>%
+  group_by(party_abbrev)%>%
+  summarize(n())
+```
+22 parties with 20 or more candidates, 21 with fewer than 20 canidates
+```{r}
+canidatesbygender <- CanadianElections%>%
+  group_by(gender)%>%
+  summarize(n())
+```
+10445 candidates with NA for gender, 3480 candidates with listed gender
+```{r}
+canidatesbyrace <- CanadianElections%>%
+  group_by(election_id)%>%
+  summarize(n())
+```
+8 elections
+```{r}
+canidatesbyrace <- CanadianElections%>%
+  group_by(election_id,gender)%>%
+  summarize(n())
+```
+1997 and 2000 are the only elections where gender was listed.
+\
+\
+
+
+
+## Exercise 2
+
+\
+
+The rows of this dataset are unique, however, as you might imagine, the rows of this dataset are not described uniquely by only considering the variable `candidate` which contains the candidate's name.  For example, we know candidates could run in multiple elections, and candidates could be different people and have the same name.  Find a minimal subset of columns which will uniquely determine each row of the dataset?  By minimal I mean any smaller subset will not uniquely determine each row.  In the process you should explain your process for coming up with this subset. As before, it is not enough to just give the subset, you need to show code and explain why you used that code.
+
+\
+\
+
+
+**ANSWER:**
+I'd get rid of the gender column, incombant,elected,residence,and province cols,occupation, they dont provide any unique identifiers and could lead to confusion, for example if someone moved their residence between elections.
+
+```{r}
+canidatesfewcol <- CanadianElections%>%
+  select(candidate,election_id,electoral_dist,party_abbrev)
+```
+\
+\
+
+## Exercise 3
+
+\
+
+Take the variable `candidate` which contains the full name (in all lower case) and split it into two variables `last_name` which will be everything after the last space in the name, and `given_name` which will be everything before that last space. Then capitalize the first letter of `last_name`, and the first letter of any "word" in the given name, for example "mary ann" will become "Mary Ann", "l. john" will become "L. John", and "david a." will become "David A.".
+
+Show the first 20 rows of this new table with the columns `candidate`, `given_name`, and `last_name`.
+
+\
+\
+
+
+**ANSWER:**
+```{r}
+canidatesnames <- separate(CanadianElections, candidate, into = c("First_Name", "Last_Name"), sep = " ")
+canidatesnames$First_Name <- str_to_title(canidatesnames$First_Name)
+canidatesnames$Last_Name <- str_to_title(canidatesnames$Last_Name)
+canidatesnames$Last_initial <- substr(canidatesnames$Last_Name, 1, 1)
+head(canidatesnames,20)
+```
+\
+\
+
+## Exercise 4
+
+\
+
+There are many possible ways that our naive approach to names will not accurately display a candidate's last name correctly.  One way will occur when the last name has characters other than letters, and another way is when the last name is more than one word (i.e., has a space).  In this exercise we will not fix all of these issues, but 
+
+you will use the `mutate()` and `stringr` commands to correctly display last names which contain the following:
+
+- apostrophes, e.g. `O'Loughlin`
+
+- dashes, e.g., `Ringuette-Maltais`
+
+- the prefix `de` or `De`
+
+- the prefix `la` or `La`
+
+- the prefix `van` or `Van`
+
+- the prefix `der` or `Der`
+
+- the prefix `von` or `Von`
+
+ In order to successfully do this problem you need to show the code that fixes these issues and you need to verify that it works (at least in these cases).
+
+
+
+\
+\
+
+
+**ANSWER:**
+```{r}
+canidatesnames$Last_Name <- str_replace_all(canidatesnames$Last_Name, 
+                                             pattern = "(^|[[:space:]])([dDvV]e|[lL]a|[vV]an|[dDvV]er|[vV]on)\\s",
+                                             replacement = "\\1\\2_")
+canidatesnames$Last_Name <- str_replace_all(canidatesnames$Last_Name,
+                                             pattern = "_",
+                                             replacement = "")
+```
+\
+\
+
+# Part II - Importing Data
+
+\
+\
+
+
+## Exercise 5
+
+\
+
+In this problem you will import a dataset from Kaggle and do some very preliminary analysis.
+
+Go to the Kaggle website and search for 
+
+\
+
+"US Core Samples". 
+
+\
+
+The first Dataset listed under this search is the one you will download.  To make sure you have the correct dataset, the first sentence under **About Dataset** reads
+
+*"This is a dataset of core samples the United States Geological Survey maintains."*
+
+In this problem you will
+
+a) download the dataset to your machine from Kaggle
+
+b) Import the dataset into `R` and call it `US_core_samples`
+
+c) give the dimensions of the dataset and describe the rows and columns
+
+d) make a table of how many rows (cores) were collected by the state in which they were collected.
+
+e) make a barplot where the x-axis represents the states, and the height of each bar is the maximum `Max Depth` of any 
+  core drilled in that state. Do this only for states where this maximum is at least 500 feet.  Sort the bars with the largest maximum at the left and the smallest at the right of the plot.
+
+\
+\
+\
+\
+
+```{r}
+core_us <- read.csv("/Users/brady3035/Documents/Comp-112/US_core_samples.csv")
+
+# (c) Dimensions and description of the dataset
+dim(core_us)
+
+# (d) Table of the number of cores collected by each state
+cores_by_state <- table(core_us$State) 
+
+
+# (e) Barplot with maximum Max Depth of cores drilled in each state
+# Filter data for Max Depth > 500 feet
+filtered_core <- core_us %>%
+  filter(Max.Depth > 500) %>%
+  group_by(State) %>%
+  summarize(Max_Depth = max(Max.Depth))
+
+filtered_core <- filtered_core[order(filtered_core$Max_Depth, decreasing = TRUE), ]
+
+ggplot(filtered_core, aes(x = reorder(State, -Max_Depth), y = Max_Depth)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Maximum Max Depth of Cores Drilled by State",
+       x = "State",
+       y = "Maximum Max Depth (feet)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Finalize your homework
+
+- Knit your Rmd one more time. Confirm that it appears as you expect and that it's correctly formatted. If the formatting is amiss, we can't grade it :/
+
+- Submit your **html** **html** **html** **html** **html** file to the Homework 6 assignment on Moodle. Do NOT submit a .Rmd or pdf or any other file type -- we will not be able to grade them.
+
+- You're done with Assignment No6. Congrats!!
+
+

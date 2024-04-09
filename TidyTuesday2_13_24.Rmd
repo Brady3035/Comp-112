@@ -1,0 +1,95 @@
+---
+title: "Tidy Tuesday 13 Feb 2024"
+author: "COMP/STAT 112"
+date: "2024-02-28"
+output: html_document
+---
+
+# Valentine's Day Consumer Data
+
+Happy Valentine's Day! This week we're exploring [Valentine's Day survey data](https://www.kaggle.com/datasets/infinator/happy-valentines-day-2022). The National Retail Federation in the United States conducts surveys and has created a [Valentine's Day Data Center](https://nrf.com/research-insights/holiday-data-and-trends/valentines-day/valentines-day-data-center) so you can explore the data on how consumers celebrate. 
+
+> The NRF has surveyed consumers about how they plan to celebrate Valentine’s Day annually for over a decade. Take a deeper dive into the data from the last 10 years, and use the interactive charts to explore a demographic breakdown of total spending, average spending, types of gifts planned and spending per type of gift. 
+
+The NRF has continued to collect data. The data for this week is from 2010 to 2022, as organized by Suraj Das for a Kaggle dataset. In the historical surveys gender was collected as only 'Men' and 'Women', which does not accurately include all genders. 
+
+If you're looking for other Valentine's Day type datasets, check out previous datasets on [chocolate](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-18) or [board games](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-25) (a good Valentine's Day activity!).
+
+## The Data
+
+```{r,message=FALSE,warning=FALSE}
+
+# load in packages
+
+library(tidyverse)
+
+historical_spending<-read_csv("https://raw.githubusercontent.com/djoloughlin/tidytuesday2_13_2024/main/historical_spending")
+
+gifts_gender<-read_csv("https://raw.githubusercontent.com/djoloughlin/tidytuesday2_13_2024/main/gifts_gender")
+
+gifts_age<-read_csv("https://raw.githubusercontent.com/djoloughlin/tidytuesday2_13_2024/main/gifts_age")
+```
+
+
+```{r}
+
+str(historical_spending)
+
+str(gifts_gender)
+
+str(gifts_age)
+
+```
+
+First I want to visualize the growth in each category of item over the years.
+```{r}
+historical_spending_long <- pivot_longer(historical_spending, cols = c("Candy","Flowers","Jewelry","GreetingCards","EveningOut","Clothing","GiftCards"), names_to = "CategorySpend", values_to = "Spent")
+historical_spending_long%>%
+  mutate(Year = as.factor(Year))
+
+
+ggplot(historical_spending_long, aes(x = Year, y = Spent, color = CategorySpend)) +
+  geom_line() +
+  labs(x = "Year", y = "Amount Spent", title = "Categorical Spending Growth") +
+  
+  theme_minimal()
+
+
+```
+
+Looks like greeting cards are a good hedge against inflation :)
+
+I also want to explore the makeup at each age and what they spend their money on.
+
+```{r}
+age_spending_long <- pivot_longer(gifts_age, cols = c("Candy","Flowers","Jewelry","GreetingCards","EveningOut","Clothing","GiftCards"), names_to = "CategorySpend", values_to = "Spent")
+
+ggplot(age_spending_long, aes(x = Age, y = Spent, fill = CategorySpend)) +
+  geom_col() +
+  labs(x = "Age", y = "Amount Spent", title = "Categorical Spending Growth") +
+  theme_minimal()
+```
+
+Now lets see per person because there might be less 65 year olds in our sample
+
+```{r}
+age_spending_long <- pivot_longer(gifts_age, cols = c("Candy","Flowers","Jewelry","GreetingCards","EveningOut","Clothing","GiftCards"), names_to = "CategorySpend", values_to = "Spent")
+
+ggplot(age_spending_long, aes(x = Age, y = Spent/SpendingCelebrating, fill = CategorySpend)) +
+  geom_col() +
+  labs(x = "Age", y = "Average Amount Spent", title = "Categorical Spending Growth") +
+  theme_minimal()
+```
+Older people have more money to spend. Who woulda guessed!?!
+
+Lets see the makup on a gendered basis
+```{r}
+gender_spending_long <- pivot_longer(gifts_gender, cols = c("Candy","Flowers","Jewelry","GreetingCards","EveningOut","Clothing","GiftCards"), names_to = "CategorySpend", values_to = "Spent")
+
+ggplot(gender_spending_long, aes(x = Gender, y = Spent, fill = CategorySpend)) +
+  geom_col() +
+  labs(x = "Gender", y = "Average Amount Spent", title = "Categorical Spending Growth") +
+  theme_minimal()
+```
+
+Men spend more total, and in a few key categories, especially Flowers.

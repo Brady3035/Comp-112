@@ -1,0 +1,177 @@
+---
+title: "Opener - Day 14"
+author: "Dan O'Loughlin"
+date: "2024-03-06"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 4, 
+  fig.width = 7,
+  fig.align = 'center')
+```
+
+\
+\
+
+```{r,message=FALSE,warning=FALSE}
+
+library(tidyverse)
+
+```
+
+\
+\
+
+# The Grades and Courses data
+
+\
+
+
+The `Grades` file has one case (row) for each class of each student (student-class pair), and includes variables describing the ID of the student (`sid`), the ID of the session (section of class), and the grade received.
+
+The `Courses` file has one case for each section of a class, and includes variables for the ID of the session (section of class), the department (coded as letters), the level, the semester, the enrollment, and the ID of the instructor (iid). 
+
+We will use these data sets to practice all of the wrangling we have learned so far, including the six main `dplyr` verbs: `filter`, `select`, `mutate`, `arrange`, `group_by`, and `summarize`.  We will also use the `join` functions and the `pivot` functions.
+
+
+\
+\
+
+
+```{r,message=FALSE,warning=FALSE}
+
+# Loading and Wrangling the Grades Data 
+
+Grades <- read_csv("https://bcheggeseth.github.io/112_fall_2023/data/grades.csv")
+
+Grades <- Grades %>%
+  select(sid, sessionID, grade) %>%
+  distinct(sid, sessionID, .keep_all = TRUE)
+
+str(Grades)
+
+```
+
+```{r,message=FALSE,warning=FALSE,cache=TRUE}
+
+# Loading the Courses Data 
+
+
+Courses <- read_csv("https://bcheggeseth.github.io/112_fall_2023/data/courses.csv")
+
+
+str(Courses)
+```
+
+
+\
+\
+
+## Practice Number 1 
+
+\
+
+Use the `Courses` data to find the total number of courses by department, the total enrollment by department, and the average enrollment per course.
+
+Then do the same thing by department AND semester, but only list those depts/semester that have at least 3 courses.
+
+\
+\
+
+
+\
+
+
+```{r}
+
+Courses_count <- Courses %>%
+  distinct(dept, iid) %>%
+  group_by(dept) %>%
+  summarize(num_courses = n())
+
+print(Courses_count)
+
+Courses_count_semester <- Courses %>%
+  group_by(dept, sem) %>%
+  distinct(dept, iid) %>%
+  
+  summarize(num_courses = n()) %>%
+  filter(num_courses >=3)
+
+print(Courses_count_semester)
+```
+
+
+\
+\
+
+## Practice Number 2 
+
+\
+
+Add columns to the `Grades` dataset by joining the `Courses` Data.  In particular add the enrollment of the course the student took and the semester.  Call this new table `GradesWithEnrollment`
+
+Then use this new table to find the average enrollment for each student who took at least three classes and order it by average enrollment of courses taken from largest to smallest.
+
+\
+\
+
+## Solution to Practice Number 2
+
+\
+
+```{r}
+courses_2 <-Courses %>%
+  select(enroll,sessionID)
+
+GradesWithEnrollment <-left_join(Grades,courses_2,by = "sessionID")
+
+print(GradesWithEnrollment)
+
+average_enrollment <- GradesWithEnrollment %>%
+  group_by(sid) %>%
+  filter(n_distinct(sessionID) >= 3) %>%  
+  summarize(average_enrollment = mean(enroll, na.rm = TRUE)) %>%
+  arrange(desc(average_enrollment))
+
+print(average_enrollment)
+```
+
+
+\
+\
+
+
+## Practice Number 3 
+
+It turns out this dataset is incomplete.  Not every student who took a course is listed.  However, we can find the courses that have the most students listed in these datasets.  Use the `GradesWithEnrollment` Table to find the four courses which have the most students in this dataset.
+
+So you should have a table for which the top four rows represent courses given by `sessionaaaa`, `sessionbbbb`, etc.
+
+Use the information from this table to make a table called `TopClasses` of all students who took any of these four courses.  This table should have 3 columns for `sid`, `sessionID` and `grade`.
+
+Use this table to make a wide table called `TopClasses_wide` with one row for each student (identified by `sid`) and then four columns for these four courses with the grades for each student in those courses. NOTE:  There will be lots of NAs!!
+
+\
+\
+
+## Solution to Practice Number 3
+
+\
+
+```{r}
+
+## Type Practice Number 3 Code here
+
+```
+
+

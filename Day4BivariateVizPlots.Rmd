@@ -1,0 +1,144 @@
+---
+title: "Day4 Bivariate Viz Plots"
+author: "STAT/COMP 112, secs. 2 and 3"
+date: "2024-01-30"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Code for the Bivariate Quantitative Plots
+
+
+Below is the code which produced the scatterplots displayed in the  Class notes for Day 4.
+
+\
+
+
+First, an unadorned scatterplot of the elo data
+
+\
+
+```{r,message=FALSE}
+library(tidyverse)
+library(fivethirtyeight)
+
+ggplot(elo_blatter,aes(x=elo98,y=elo15)) +
+  geom_point()
+```
+
+\
+
+Here is the same plot with the point representing USA highlighted
+
+Note: we have also labelled the point.  This was done using the package **gghighlight**.
+
+\
+
+```{r}
+library(gghighlight)
+
+ggplot(elo_blatter,aes(x=elo98,y=elo15)) +
+  geom_point(color="red",size=2) +  
+  gghighlight(country=="United States",label_key = country,
+              unhighlighted_params = list(color="blue",size=1))
+
+```
+
+
+# Code for the Bivariate Categorical Plots
+
+\
+
+
+Below is the code which produced the barplots displayed in the notes for Day 4.
+
+\
+
+```{r}
+library(ISLR2)
+
+str(Auto)
+names(Auto)
+
+## Note in the commands below, in the aesthetic we use the option 
+## fill = <second variable>     to make the colored bar segments
+
+ggplot(Auto,aes(x=as.factor(origin),fill=as.factor(cylinders)))+
+  geom_bar()
+
+ggplot(Auto,aes(x=as.factor(cylinders),fill=as.factor(origin)))+
+  geom_bar()
+```
+
+\
+
+
+# Day 4 Exercises
+
+\
+
+Create a new .rmd file called **Day 4 Exercises** and do these problems in that markdown document
+
+\
+
+in the first code chunk of your document you will need to load in the packages containing the data. so run
+
+**library(fivethirtyeight)**
+
+and
+
+**library(ISLR2)**
+
+\
+
+## Exercise 1
+
+\
+
+Using code similar to the highlighted scatterplot for the elo rankings, replace the option 
+
+*country = "United States"*  with  *confederation = "CONMEBOL"*
+
+also replace  *size = 2* with *size = 3* in the geom_point() options
+
+Explain what these changes do to the plot.
+
+Now do the same thing for the confederation *CONCACAF* (this is the federation to which the USA belongs).
+
+Describe similarities and differences that you see between the elo rankings of the countries in the two federations.
+
+Also, how is the second plot different from the first, and can you explain why it is different?
+\
+```{r}
+ggplot(elo_blatter,aes(x=elo98,y=elo15)) +
+  geom_point(color="red",size=3) +  
+  gghighlight(confederation=="CONCACAF",label_key = country,
+              unhighlighted_params = list(color="blue",size=1))
+
+```
+\
+this outlines all the countries in the confederation of conmebol. also changed the size of the dots
+
+Too many points are highlighted to have the text on the graph
+## Exercise 2
+
+\
+
+In the ISLR2 repository of data there is a dataset called **BrainCancer** which has 5 categorical variables with each with four or fewer categories.  Using different pairs of variables make *at least three* segmented barplots using these variables and describe what these plots tell you about the relationships between the variables.
+
+```{r}
+ggplot(BrainCancer,aes(x=as.factor(stereo),fill=as.factor(diagnosis)))+
+  geom_bar()
+ggplot(BrainCancer,aes(x=as.factor(loc),fill=as.factor(diagnosis)))+
+  geom_bar()
+ggplot(BrainCancer,aes(x=as.factor(diagnosis),fill=as.factor(sex)))+
+  geom_bar()
+```
+
+SRS seems to have a lower total diagnosis number than SRT screening
+
+most of the cancers have a higher rate in supratertorial location vs infratentorial except for the other catergory
+
+Females seem to have higher rates of cancer in Meninioma, but in all other categories the males seem to have higher rates when compared to women

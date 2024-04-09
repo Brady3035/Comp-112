@@ -1,0 +1,410 @@
+---
+title: "Cherry Blossom Wrangling"
+author: "STAT/COMP 112 - Macalester"
+date: "2024-02-20"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 5,
+  fig.width = 7,
+  fig.align = 'center')
+```
+
+\
+
+# Cherry Blossom Info.
+
+\
+\
+
+`Cherry` is a dataset from the `mdsr` package which has all the times for people who ran the Cherry Blossom Run in Washington DC  more than once during the ten years 1999-2008.
+
+\
+\
+
+
+
+## Preliminaries
+
+\
+
+- Make sure you have the package `mdsr` installed.  The `Cherry` data comes from this package.
+
+- Run the command    `library(mdsr)`   in the console and then explore the dataset by running  `help(Cherry)`  and    `View(Cherry)`
+
+\
+\
+
+```{r}
+
+## loading packages and data
+
+library(tidyverse)
+library(mdsr)
+
+```
+
+\
+\
+
+# Opener Questions
+
+\
+\
+
+In the following questions you will need to use the first four of the `dplyr` verbs that we have learned: `filter()`, `select()`, `mutate()`, and `arrange()`.  Write the appropriate code in the code chunk below each question.
+
+## Question 1
+
+\
+\
+
+Find all of the runners who ran all ten races from 1999-2008 and sort them in descending order from fastest to slowest (by "gun" time).  In the table show their name, age, sex, and time. Call this subset `Cherry_All10`.
+
+\
+
+```{r}
+
+## Code to answer Question 1
+
+
+```
+
+\
+\
+
+## Question 2
+
+\
+\
+
+Find the twenty fastest females and twenty fastest males over this time interval (Note, this dataset does not include runners who ran the race only once).  In the table show their name, age, sex, and time and call these subsets `Cherry_Fast_Females` and `Cherry_Fast_Males`.
+
+\
+
+```{r}
+
+## Code to answer Question 2
+
+
+```
+
+\
+\
+
+## Question 3
+
+\
+\
+
+Note that the times are given in decimal minutes.  Use the `floor()` function which rounds down any decimal number to its next lowest integer to give the times from the previous subsets in **minutes** and **seconds**.  In the table show their name, age, sex, mins, and secs and call these subsets `Cherry_Fast_Females1` and `Cherry_Fast_Males2`.
+
+\
+
+```{r}
+
+## Code to answer Question 3
+
+
+```
+
+\
+\
+
+
+# Using summarize() and group_by()
+
+\
+\
+
+Recall that we can use the summarize() and group_by() functions to summarize data across categories of a categorical variable.
+
+\
+\
+
+## Examples using the `Cherry` data
+
+\
+\
+
+### Example 1: Consistent Runners
+
+\
+\
+
+Suppose we want to find the most **consistent** runners in terms of their times for runners who have run the Cherry Blossom Run at least 7 times.  Well, one way we could measure consistency is to take the difference between their fastest and slowest times(we will call this `Range`).  Another way is to measure the standard deviation of their times (we will call this `SD`).
+
+Here is code to compute these measurements:
+
+\
+\
+
+```{r}
+
+## finding consistent runners
+
+ConsistentCherry1<-Cherry %>%
+  filter(nruns>=7) %>%
+  group_by(name.yob,sex) %>%
+  summarize(Range=max(gun)-min(gun),SD=sd(gun)) %>%
+  select(name.yob,sex,Range,SD) %>%
+  arrange(Range)
+
+ConsistentCherry1
+
+ConsistentCherry2<-ConsistentCherry1 %>%
+  arrange(SD)
+
+ConsistentCherry2
+
+
+
+```
+
+\
+\
+
+There is obviously something wrong with the first table, so we want to figure out what went wrong.  To that end, we find all the records for "george poporad 1950."
+
+\
+\
+
+```{r}
+
+GP<-Cherry %>%
+  filter(name.yob == "george poporad 1950")
+
+GP
+
+```
+
+\
+\
+
+From this we see that "George" was miscoded as Female for one year.  This was only a problem for computing the range since the one entry with "George" as a female had NA for its SD, so we will leave his record out. An alternative is to ignore sex in our `group_by` command.
+
+
+\
+\
+
+```{r}
+
+ConsistentCherry1[2:11,]
+
+
+ConsistentCherry1<-Cherry %>%
+  filter(nruns>=7) %>%
+  group_by(name.yob) %>%
+  summarize(Range=max(gun)-min(gun),SD=sd(gun)) %>%
+  select(name.yob,Range,SD) %>%
+  arrange(Range)
+
+ConsistentCherry1
+
+```
+
+\
+\
+
+
+### Example 2:  Age Group Records
+
+\
+\
+
+Suppose we want to make a plot which shows the fastest time by age for all the runners in this dataset and do this on the same plot for males and females.
+
+\
+\
+
+Here is the code to do this.
+
+\
+\
+
+```{r}
+
+CherryAgeRecords<-Cherry %>%
+  group_by(age,sex) %>%
+  summarize(Fastest=min(gun)) %>%
+  arrange(age)
+
+CherryFemaleAgeRecords<-CherryAgeRecords %>%
+  filter(sex=="F")
+
+CherryMaleAgeRecords<-CherryAgeRecords %>%
+  filter(sex=="M")
+
+## here are tables for the age group fastest runners
+
+CherryMaleAgeRecords
+
+CherryFemaleAgeRecords
+
+#  here is the plot
+
+
+ggplot(CherryAgeRecords,aes(x=age,y=Fastest))+
+  geom_point(aes(color=sex),alpha=0.5)+
+  labs(title="Fastest times by Gender",x= "Age in years",y="time in minutes",color="gender")
+
+```
+
+\
+\
+
+We note from the plot that, again, something went wrong, and it probably has to do with missing data, so let's try this again, but first we will filter out any possible NAs in the data for the variables we are interested in.
+
+\
+\
+
+
+```{r}
+
+CherryAgeRecords<-Cherry %>%
+  filter(!is.na(age) & !is.na(sex) & !is.na(gun)) %>% # filter out NAs
+  group_by(age,sex) %>%
+  summarize(Fastest=min(gun),NoRunners=n()) %>%
+  arrange(age)
+
+CherryFemaleAgeRecords<-CherryAgeRecords %>%
+  filter(sex=="F")
+
+CherryMaleAgeRecords<-CherryAgeRecords %>%
+  filter(sex=="M")
+
+## here are tables for the age group fastest runners
+
+CherryMaleAgeRecords
+
+CherryFemaleAgeRecords
+
+#  here is the plot
+
+
+ggplot(CherryAgeRecords,aes(x=age,y=Fastest))+
+  geom_point(aes(color=sex),alpha=0.5)+
+  labs(title="Fastest times by Gender",x= "Age in years",y="time in minutes",color="gender")
+
+```
+
+\
+\
+
+This looks much better!  
+
+Looking at the plot we see there is a year aroiund age 20 where the fastest female is faster than the fastest male.  Let's check this out.
+
+
+\
+\
+
+```{r}
+
+CherryAge20 <- Cherry %>%
+  filter(age==20) %>%
+  select(name.yob, age,sex,gun)  %>%
+  arrange(gun)
+
+CherryAge20
+
+```
+
+\
+\
+
+# Practice 
+
+\
+\
+
+## Practice No. 1
+
+\
+\
+
+Make two tables one for each gender (measured by sex) which shows the top ten fastest runners who have run the race at least 7 times.  
+
+looking through these tables
+
+- are there runners who appear multiple times in the top 20?
+
+- are there years with at least 4 runners in the top 20 times?
+
+
+```{r}
+
+FastestFemales<-Cherry%>%
+  filter(nruns>=7,sex=="F")%>%
+  select(name.yob,sex,year,gun)%>%
+  arrange(gun)
+FastestFemales[1:20,]
+
+FastestMales<-Cherry%>%
+  filter(nruns>=7,sex=="M")%>%
+  select(name.yob,sex,year,gun)%>%
+  arrange(gun)
+FastestMales[1:20,]
+
+```
+
+
+\
+\
+
+## Practice No. 2 CHALLENGE
+
+\
+\
+
+Make a table with one row for each year which shows the difference between the fastest men's time and the fastest women's time, and sort the table from smallest difference to largest, so your table should have ten rows and the first row will be the year in which the women's winner was closest to the men's winner in time.
+
+
+```{r}
+
+CherryDiff<-Cherry%>%
+  filter(!is.na(age) & !is.na(gun))
+
+
+```
+
+
+\
+\
+
+# Pivot Wider example
+
+`pivot_wider` takes a table and spreads the table out by a categorical variable.  In this case it uses the variable `year` to make a column for each year in the table, and in that column it puts the value of the quantitative variable `gun` for each individual.  
+
+Note the use of the parameters `names_from` and `values_from` which are required for `pivot_wider()`.
+
+\
+\
+
+```{r}
+
+## Use pivot_wider to make a table which has only the runners who ran every
+## year from 1999 to 2008, and which has a column with their gun time for each year
+## arrange the table from fastest to slowest by their 2008 times.
+
+Cherry_All<-Cherry %>%
+  filter(nruns==10) %>%
+  select(name.yob,sex,gun,year) %>%
+  pivot_wider(names_from = year,values_from = gun) %>%
+  arrange(`2008`)
+
+
+Cherry_All
+
+Cherry_All[1:25,c(1:3,7:12)]
+
+```

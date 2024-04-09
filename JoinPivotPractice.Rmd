@@ -1,0 +1,127 @@
+---
+title: "Join and Pivot Practice"
+author: "COMP/STAT 112"
+date: "2024-03-21"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 4, 
+  fig.width = 7,
+  fig.align = 'center')
+```
+
+\
+\
+
+This Document is meant to help practice for the second part of the Assessment on 26 March.
+
+\
+\
+
+# 1) Practice with Joins
+
+The goal of this exercise is to make a table of all players who have ever had at least 50 home runs (HR) in a season, and then sort that table from highest to lowest based on the winning percentage of the team for the season in which they hit 50 HRs.  In the final table you should have the following columns
+
+\
+
+`nameLast`, `nameGiven`, `yearID`,`teamID`,`HR`,`W`,`L`,`WinPct`
+
+\
+
+A couple of notes:
+
+- you will need to use the `Batting` table in Lahman to make the initial table of all players who have at least 50 HRs in a season
+
+- you will need to join the `People` table in an appropriate way to include the variables `nameLast` and `nameGiven`
+
+- you will need to join the `Teams` table in an appropriate way to include the variables `W` and `L`
+
+- winning percentage can be computed by `W/(W+L)`
+
+- if a variable name appears in both tables that are joined AND it is not the key (or one of the keys) for joining the tables, then the variables are distinguished in the joined table by adding a `.x` or a `.y`
+
+\
+\
+
+##  Write your code for 1) here
+
+\
+\
+
+
+```{r}
+
+library(tidyverse)
+library(Lahman)
+
+##  Put your code here to make the table for this problem
+
+```
+
+\
+\
+
+## Question
+
+How many of the players who hit 50 HRs in a season did it for a team with a winning record (WinPct>.5), and how many players did it for a team without a winning record (WinPct <= .5)?
+
+\
+\
+
+# 2) Practice with Pivots
+
+\
+\
+
+Three (in)famous players had overlapping careers and hit over 60 Home runs within the same time span.  Those players are Barry Bonds (`playerID=="bondsba01"`), Sammy Sosa (`playerID=="sosasa01"`), and Mark McGwire (`playerID=="mcgwima01"`).  In the code chunk below a table has been made with the relevant statistics for these three players over the four seasons from 1998 to 2001.
+
+Use `pivot_wider` to make a wide format table with columns for each of the years from 1998-2001 showing the number of HRs by each player in those years.
+
+\
+\
+
+## Write your code for 2) here
+
+\
+\
+
+```{r}
+
+SosaBondsMcGwire<-Batting %>%
+  filter(playerID=="sosasa01" | playerID=="bondsba01" | playerID=="mcgwima01"
+         ,yearID>=1998,yearID<=2001) %>%
+  select(playerID,yearID,teamID,HR)
+
+## write the code to make the wide table here
+
+
+```
+
+\
+\
+
+## Question
+
+Once you get the code to produce the correct wider table, use the same code to make a similar wide table for the years from 1997 to 2002 (so for six years).  Note that this table has many NAs.  Try to eliminate most of the NAs by doing some simple wrangling so that the wider table has only one row for each player, and all but one of the NAs are removed.
+
+\
+\
+
+```{r}
+
+## code for the tables for 1997 to 2002
+
+
+```
+
+  
+  

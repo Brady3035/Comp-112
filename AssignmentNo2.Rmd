@@ -1,0 +1,443 @@
+---
+title: "Assignment #2 - COMP/STAT 112 secs 2&3"
+author: "Brady Brunswig"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 3, 
+  fig.width = 5,
+  fig.align = 'center')
+```
+
+
+\
+
+
+**DIRECTIONS**
+
+- Save this file as **AssignmentNo2** in your course folder for COMP/STAT 112
+- Type your name in line 3 above (where it says "author").
+- Type your responses in this template. You won't be able to knit it until after you've completed Exercise 0.
+- Do not modify the structure of this document (e.g. don't change section headers, spacing, etc).
+- For each Exercise enter the necessary code and text to answer the question below where it says **ANSWER** for each exercise.
+- Submit your knit **HTML** file by the end of the day on Friday 2/9, so by 11:59 PM. We cannot grade Rmd and pdf files.
+
+
+\
+\
+
+
+**GOALS**
+
+Practice some basic data exploration and data visualization in guided settings.
+The content of the exercises is not necessarily in the order that we learned it, so you'll need to practice identifying appropriate tools for a given task.
+
+
+
+
+\
+\
+
+
+
+# Exercise 0
+
+## Part a
+
+We'll be using some data stored in the `ISLR2` and `fivethirtyeight` packages.
+
+- Check whether you already have these packages (lower right pane of RSTudio).
+- If not, install them.
+
+
+## Part b
+
+```{r}
+library(tidyverse)
+library(gghighlight)
+library(ISLR2)
+library(fivethirtyeight)
+```
+
+
+
+
+\
+\
+\
+\
+
+
+
+
+# Exercise 1
+
+*NOTE: this problem was assigned to be done as part of the Daily Lesson on Day 4, Tuesday, 30 January.  You can cut and paste what you did then as long as it was carefully done and complete, otherwise complete it.*
+
+\
+
+Using code similar to the highlighted scatterplot (where we used the package **gghighlight** to highlight the point associated with the USA in a scatterplot of (eol98,eol15)) of the elo rankings, replace the option 
+
+*country = "United States"*  with  *confederation = "CONMEBOL"*
+
+also replace  *size = 2* with *size = 3* in the geom_point() options
+
+Explain what these changes do to the plot.
+
+Now do the same thing for the confederation *CONCACAF* (this is the federation to which the USA belongs).
+
+Describe similarities and differences that you see between the elo rankings of the countries in the two federations.
+
+Also, how is the second plot different from the first, and can you explain why it is different?
+
+\
+
+\
+
+\
+
+
+**ANSWER:**
+
+\
+\
+```{r}
+ggplot(elo_blatter,aes(x=elo98,y=elo15)) +
+  geom_point(color="red",size=3) +  
+  gghighlight(confederation=="CONMEBOL",label_key = country,
+              unhighlighted_params = list(color="blue",size=1))
+
+```
+
+```{r}
+ggplot(elo_blatter,aes(x=elo98,y=elo15)) +
+  geom_point(color="red",size=3) +  
+  gghighlight(confederation=="CONCACAF",label_key = country,
+              unhighlighted_params = list(color="blue",size=1))
+
+```
+/
+this outlines all the countries in the confederation of conmebol. also changed the size of the dots
+
+# Exercise 2
+
+*NOTE: this problem also was assigned to be done as part of the Daily Lesson on Day 4, Tuesday, 30 January.  Agan, you can cut and paste what you did then as long as it was carefully done and complete, otherwise complete it.*
+
+\
+
+
+In the ISLR2 repository of data there is a dataset called **BrainCancer** which has 5 categorical variables---each with four or fewer categories.  Using different pairs of variables make *at least three* segmented barplots using these variables and describe what these plots tell you about the relationships between the variables.
+
+\
+
+\
+
+\
+
+
+**ANSWER:**
+
+\
+\
+```{r}
+ggplot(BrainCancer,aes(x=as.factor(stereo),fill=as.factor(diagnosis)))+
+  geom_bar()
+ggplot(BrainCancer,aes(x=as.factor(loc),fill=as.factor(diagnosis)))+
+  geom_bar()
+ggplot(BrainCancer,aes(x=as.factor(diagnosis),fill=as.factor(sex)))+
+  geom_bar()
+```
+
+/
+/
+SRS seems to have a lower total diagnosis number than SRT screening
+
+most of the cancers have a higher rate in supratertorial location vs infratentorial except for the other catergory
+
+Females seem to have higher rates of cancer in Meninioma, but in all other categories the males seem to have higher rates when compared to women
+/
+/
+# Exercise 3
+
+*NOTE: this problem was assigned (as Exercise 4) to be done as part of the Daily Lesson on Day 5, Thursday, 1 February.  You can cut and paste what you did then as long as it was carefully done and complete, otherwise complete it.*
+
+\
+
+The code below 
+
+**+ geom_smooth(se=FALSE,method = lm)** 
+
+adds a least-squares regression line (without SE) to a scatterplot, in this case for the association between the variables **elo98** and **elo15**.
+
+We want to enhance this plot in a couple of ways.  First we want to remove the NAs which are in the **elo98** variable, so make the same plot with those values removed.  Then make six separate plots highlighting in turn each of the points associated with the various confederations in the plots. So, for example, you will make a plot that highlights only the CONCACAF federation.  In each case note where the highlighted points are above or below the plotted line.  What do these plots tell us about the change in elo ratings for the different confederations?
+
+*HINT:*  when you add a trend line to these scatterplots, and then highlight some points, there will also be a highlighted trend line just based on those points.  When you are considering how those countries that are highlighted compare to the overall trend you can also consider this other trend line.
+
+\
+
+
+
+\
+
+\
+
+\
+
+
+**ANSWER:**
+
+\
+\
+```{r}
+
+# Remove NAs from elo98 variable
+elo_blatter <- elo_blatter[!is.na(elo_blatter$elo98),]
+
+# Function to create separate plots for each confederation
+ggplot(data = elo_blatter, aes(x=elo98,y=elo15))+
+  geom_point()+
+  facet_wrap(~confederation)
+```
+/
+/
+
+# Exercise 4
+
+For the next few problems we will use the dataset **Bikeshare** from the **ISLR2** package.
+
+In this problem you will explore what the data in the dataset is all about.  In particular
+
+- where does the data come from?
+- how many and what types of variabes are there (note how the values are represented)?
+- what does each row in the dataframe represent?
+
+To answer these questions you will need to use the commands **help(), str(), View(), names()**.  You will also need to perform some basic internet searches to sufficiently gather some information about the data.
+
+\
+
+\
+
+\
+
+
+**ANSWER:**
+```{r}
+library(ISLR2)
+help(Bikeshare)
+
+```
+This data set contains the hourly and daily count of rental bikes between years 2011 and 2012 in Capital bikeshare system, along with weather and seasonal information
+
+A data frame with 8645 observations on a number of variables.
+
+season
+Season of the year, coded as Winter=1, Spring=2, Summer=3, Fall=4.
+
+mnth
+Month of the year, coded as a factor.
+
+day
+Day of the year, from 1 to 365
+
+hr
+Hour of the day, coded as a factor from 0 to 23.
+
+holiday
+Is it a holiday? Yes=1, No=0.
+
+weekday
+Day of the week, coded from 0 to 6, where Sunday=0, Monday=1, Tuesday=2, etc.
+
+workingday
+Is it a work day? Yes=1, No=0.
+
+weathersit
+Weather, coded as a factor.
+
+temp
+Normalized temperature in Celsius. The values are derived via (t-t_min)/(t_max-t_min), t_min=-8, t_max=+39.
+
+atemp
+Normalized feeling temperature in Celsius. The values are derived via (t-t_min)/(t_max-t_min), t_min=-16, t_max=+50.
+
+hum
+Normalized humidity. The values are divided to 100 (max).
+
+windspeed
+Normalized wind speed. The values are divided by 67 (max).
+
+casual
+Number of casual bikers.
+
+registered
+Number of registered bikers.
+
+bikers
+Total number of bikers.
+
+each row was a rental of a bike
+\
+
+\
+
+# Exercise 5
+
+Now that we understand the **Bikeshare** data a little better we will create some visualizations which will help illuminate the data.
+
+One of the variables that we would like to use is the **weathersit** variable which nominally has four possible values.  However, one of those categories (values) is only represented once in the dataset as can be seen by the following command (when you knit this document the output will be included and you can see the value we want to remove).
+
+\
+
+```{r}
+table(Bikeshare$weathersit)
+```
+
+\ 
+           
+So, it is not very helpful to include this category in our plots.  The code below will produce side-by-side boxplots of the quantitative variable **riders** for this weather variable, but without this category.
+
+```{r}
+
+ggplot(subset(Bikeshare,weathersit!="heavy rain/snow"),aes(x=weathersit,y=bikers))+
+  geom_boxplot()
+```
+
+\
+
+We want to understand better how the weather affects the number of riders (**bikers**) according to various other variables. In this case we will look at the effects considering whether or not the day is a **holiday**, or a **workday**.  Make side-by-side boxplots using **facet_wrap** to answer this question for each of these variables.  So your plots will contain information about three variables, the quantitative variable **bikers**, the categorical variable **weathersit**, and a second categorical variable.  Make sure to eliminate the category "heavy rain/snow" before you make your plots.
+
+\
+```{r}
+
+ggplot(subset(Bikeshare,weathersit!="heavy rain/snow"),aes(x=weathersit,y=bikers))+
+  geom_boxplot() +
+  facet_wrap(~holiday)
+```
+\
+```{r}
+
+ggplot(subset(Bikeshare,weathersit!="heavy rain/snow"),aes(x=weathersit,y=bikers))+
+  geom_boxplot() +
+  facet_wrap(~workingday)
+```
+\
+
+
+**ANSWER:**
+
+\
+\
+
+
+# Exercise 6
+
+We also want to understand how the type of day---**workingday** (yes or no) AND **holiday** (yes or no)---affects the relationship between the number of registered riders and the number of casual riders.
+
+So, for this exercise, make scatterplots of the data with the number of registered riders on the x-axis and the number of casual riders on the y-axis.  In one scatterplot color the points according to the variable **workingday** and the other according to the variable **holiday**.  One of these plots does a much better job of explaining the shape of the points in the scatterplot, which plot is that and what does it seem to show?
+
+Also, make a scatterplot coloring the points according to the variable **weekday**.  Why is this not as effective as seeing the realtionship between these variables as the previous ones were?  Use **facet_wrap(~weekday)** to better show this relationship and explain what you see.
+
+
+\
+working day shows the shape much better as it clearly shows that many people who ride on working days are registered riders vs casual riders.
+\
+when a categorical variable has many catergories, seperating them by color gets harder to deccern so you can just split it into different graphs and then its way easier to tell the differences
+\
+
+
+**ANSWER:**
+```{r}
+ggplot(data = Bikeshare,aes(x=casual,y = registered,color = workingday))+
+  geom_point()
+ggplot(data = Bikeshare,aes(x=casual,y = registered,color = holiday))+
+  geom_point()
+ggplot(data = Bikeshare,aes(x=casual,y = registered,color = weekday))+
+  geom_point()
+ggplot(data = Bikeshare,aes(x=casual,y = registered))+
+  geom_point() + facet_wrap(~weekday)
+```
+\
+\
+
+
+# Exercise 7
+
+This exercise is a little more open-ended, and it has two parts:
+
+\
+
+## Part a
+
+Consider the categorical variable **season**.  Think of a relationship between this variable and at least one other variable in the data set that you want to explore, then make at least two plots which help explain the relationship.  Describe what each plot tells you.
+
+
+
+```{r}
+ggplot(data = Bikeshare,aes(x=casual,y = registered))+
+  geom_point() + facet_wrap(~season)
+ggplot(data = Bikeshare,aes(x=hr,y = (casual + registered)))+
+  geom_point() + facet_wrap(~season)
+```
+\ 
+The first one shows out that there is lower ridership in the winter season and the fact that registered riders are more common in winter. The second one does a good job visualizing the longer days in the summer vs the spring by the distribution
+
+## Part b
+
+Consider the categorical variable **hr** which has 24 values 0-23.  Think of a relationship between this variabe and at least one other variable in the dataset that you want to explore, then make at least two plots which help explain the relationship.  Describe what each plot tells you.
+
+
+The first plot shows the riders based on hour, pretty intresting to see what hours have the highest number of total hours.
+
+Second and third plots tell us a lot about each group, and shows that registered riders are more likely to ride at the beginning and end of a work day.
+\
+```{r}
+ggplot(data = Bikeshare,aes(x=hr,y = (registered + casual)))+
+  geom_point()
+ggplot(data = Bikeshare,aes(x=hr,y = (registered)))+
+  geom_point()
+ggplot(data = Bikeshare,aes(x=hr,y = (casual)))+
+  geom_point()
+```
+\
+
+\
+
+
+**ANSWER:**
+
+\
+\
+
+
+\
+\
+\
+\
+
+
+
+# Finalize your homework
+
+- Knit your Rmd one more time. Confirm that it appears as you expect it and that it's correctly formatted. If the formatting is amiss, we can't grade it :/
+
+- If you're working on Mac's RStudio server, you have one more step that you should take at the end of each activity / assignment: export your files to your computer. To do so:        
+    - Go to the Files tab in the lower right pane.
+    - Click the boxes next to the *two* homework files: homework_1.Rmd and homework_1.html.
+    - Still within the Files tab, click on the "More" button that has a gear symbol next to it.
+    - Click "Export" then "Download".
+    - The files were likely exported from the RStudio server to the Downloads folder on your computer. It's important to now move them to the course folder that you created for this class. They are now there for safe keeping :)
+
+- Submit your **html** **html** **html** **html** **html** file for Assignment No. 2 on Moodle. Do **NOT** submit a .Rmd or pdf or any other file type -- we will not be able to grade them.
+
+- You're done with Assignment No. 2. Congrats!!
+
+

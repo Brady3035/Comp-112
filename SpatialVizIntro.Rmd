@@ -1,0 +1,103 @@
+---
+title: "Global Starbucks Locations"
+author: "Dan O'Loughlin"
+date: "2024-02-06"
+output: html_document
+---
+
+
+```{r include = FALSE}
+# This chunk just sets up some styling (eg: default size of our images)
+knitr::opts_chunk$set(
+  collapse = TRUE, 
+  warning = FALSE,
+  message = FALSE,
+  fig.height = 8, 
+  fig.width = 8,
+  fig.align = 'center')
+```
+
+
+
+\
+\
+
+
+### Our goal in this short Document is to make a world map and color it with the location of all the Starbucks in the world (at least at the time the data was collected)
+
+
+\
+\
+
+```{r}
+# Load the necessary packages
+library(tidyverse)
+library(rnaturalearth)
+
+# Get info about country boundaries across the world
+# in a "sf" or simple feature format
+world_boundaries <- ne_countries(returnclass = "sf")
+
+
+# Import starbucks location data
+starbucks <- read.csv("https://bcheggeseth.github.io/112_fall_2023/data/starbucks.csv")
+```
+
+\
+
+
+In your **console**, type `world_boundaries` to see what is stored there.
+Don't print it our in your Rmd -- printing it would be really messy there (even just the `head()`).
+
+then, also in the **console** run the command
+
+`starbucks <- read.csv("https://bcheggeseth.github.io/112_fall_2023/data/starbucks.csv")`
+
+and in the **console** and type **View(starbucks)**
+
+to see what is stored in that dataset.
+
+\
+\
+
+
+- **Make a blank map**
+
+\
+
+
+```{r}
+# What does this code produce?
+# What geom are we using for the point map?
+ggplot(world_boundaries) + 
+  geom_sf()
+```
+
+\
+
+
+- **add the locations of the Starbucks stores using the Lat and Long stored in the `starbucks` dataset for each store**
+
+\
+
+
+
+```{r}
+# Load package needed to change map theme
+library(mosaic)
+
+# Now add a point for each Starbucks
+# NOTE: The Starbucks info is in our starbucks data, not world_boundaries
+# How does this change how we use geom_point?!
+ggplot(world_boundaries) + 
+  geom_sf() + 
+  geom_point(
+    data = starbucks,
+    aes(x = Longitude, y = Latitude),
+    alpha = 0.3, size = 0.2, color = "darkgreen"
+  ) +
+  theme_map()
+```
+
+
+
