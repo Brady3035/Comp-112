@@ -1,0 +1,32 @@
+---
+title: "Project"
+author: "Brady,Sophie,Mary"
+date: "2024-04-11"
+output: html_document
+---
+
+# Project Topic
+  Student alcohol consumption
+# One Question of interest
+  How does a student's homelife impact their alcohol consumption
+  
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data1 = read.csv("https://raw.githubusercontent.com/Brady3035/Comp-112/main/student-lpor.csv")
+```
+
+```{r}
+vars_of_intrest <- data1 %>%
+  select(famsize,Pstatus,Medu,Fedu,Fjob,Mjob,famsup,Dalc,Walc,health,absences,age)
+
+```
+
+```{r}
+ggplot(data = vars_of_intrest, aes(x=age,y = Dalc))+
+  geom_point()+
+  facet_wrap(~Pstatus) + geom_jitter()
+
+```
