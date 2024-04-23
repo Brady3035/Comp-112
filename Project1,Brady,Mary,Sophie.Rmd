@@ -1,8 +1,13 @@
 ---
 title: "Project"
-author: "Brady,Sophie,Mary"
+author: "Brady,Sofie,Mary"
 date: "2024-04-11"
-output: html_document
+output: 
+  html_document:
+  toc: true
+  toc_float: true
+  theme: cosmo
+  highlight: espresso
 ---
 
 # Project Topic
@@ -16,17 +21,30 @@ library(tidyverse)
 
 ```{r}
 data1 = read.csv("https://raw.githubusercontent.com/Brady3035/Comp-112/main/student-lpor.csv")
-```
-
-```{r}
 vars_of_intrest <- data1 %>%
   select(famsize,Pstatus,Medu,Fedu,Fjob,Mjob,famsup,Dalc,Walc,health,absences,age)
-
 ```
 
 ```{r}
 ggplot(data = vars_of_intrest, aes(x=age,y = Dalc))+
   geom_point()+
   facet_wrap(~Pstatus) + geom_jitter()
+```
+
+
+Here we have a graph that adds up the categorical variables Dalc and Walc which represent on a scale of 1-5 how much alcohol a highschool student in portugal drinks on working days vs weekend days, against their average absenses to try and get an idea if more alcohol results in more absenses from school. 
+
+``` {r,echo=FALSE}
+
+vars_of_intrest <- mutate(vars_of_intrest, Dalc_Walc = Dalc + Walc)
+
+mean_absences <- vars_of_intrest %>%
+  group_by(Dalc_Walc) %>%
+  summarise(mean_absences = mean(absences))
+
+ggplot(mean_absences, aes(x = factor(Dalc_Walc), y = mean_absences)) +
+  geom_col() +
+  labs(x = "Dalc + Walc", y = "Average Absences") +
+  theme_minimal()
 
 ```
